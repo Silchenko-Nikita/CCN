@@ -1,0 +1,42 @@
+import os
+
+from django.conf.global_settings import LANGUAGES
+from django.contrib.auth.models import User
+from django.db import models
+from django.db.models.signals import post_save
+from django.utils.translation import ugettext as _
+
+from general.models import CreatedUpdatedModel
+
+
+User._meta.get_field('email')._unique = True
+
+
+class UserProfile(CreatedUpdatedModel):
+    AVATAR_PATH = os.path.join('accounts', 'avatars')
+    DEFAULT_AVATAR = os.path.join(AVATAR_PATH, 'default.png')
+
+    user = models.OneToOneField(User, related_name='profile', unique=True)
+    birthday = models.DateField(blank=True, null=True)
+    language = models.CharField(max_length=2, choices=LANGUAGES, default='ru')
+    avatar = models.ImageField(upload_to=AVATAR_PATH, default=DEFAULT_AVATAR)
+
+    def __str__(self):
+        return str(self.user) + " profile"
+
+    class Meta:
+        db_table = 'user_profile'
+        verbose_name = _('User profile')
+        verbose_name_plural = _('User profiles')
+
+
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.create(user=instance)
+
+
+def save_user_profile(sender, instance, **kwargs):
+    instance.profile.save()
+
+post_save.connect(create_user_profile, sender=User)
+post_save.connect(save_user_profile, sender=User)

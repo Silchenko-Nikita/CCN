@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% load i18n %}
+
+{% block content %}
+    <h3>{{ user.username }}</h3>
+    <h4>({{ user.first_name }} {{ user.last_name }})</h4>
+    <br>
+
+    <img src="{{ user.profile.avatar.url }}" alt="avatar" width="80px">
+
+    <ul>
+    {% for field in profile_info_form %}
+        <li><b>{{ field.label }}:</b> {% if field.data %}{{ field.data }}{% endif %}</li>
+    {% endfor %}
+    </ul>
+
+    {% if not is_owner %}
+        <a href="">{% trans "Go to chat" %}</a>
+    {% endif %}
+{% endblock %}
+
+{% block nav %}
+    <ul>
+        <li>
+            <a href="{% url 'profiles-search' %}">Search for users</a>
+        </li>
+    </ul>
+{% endblock %}

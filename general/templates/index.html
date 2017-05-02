@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% load i18n %}
+
+{% block header %}
+    <h2 class="center-text">{% blocktrans %}Welcome to collective creativity network!{% endblocktrans %}</h2>
+{% endblock %}
+
+{% block nav %}
+    <ul>
+        <li>
+            <a href="{% url 'login' %}">{% trans 'Login' %}</a>
+        </li>
+        <li>
+            <a href="{% url 'register' %}">{% trans 'Register' %}</a>
+        </li>
+    </ul>
+{% endblock %}

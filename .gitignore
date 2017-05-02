@@ -1,0 +1,6 @@
+logs/
+*.log
+*.pyc
+.idea/
+__pycache__/
+media/

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{% load i18n static %}
+
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %}</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+{#    <script language="javascript" type="text/javascript" href="{% static 'third_party/jquery-3.2.1.min.js' %}"></script>#}
+    <link type="text/css" rel="stylesheet" href="{% static 'main.css' %}">
+    {% block extrahead %}{% endblock %}
+    {% block extrastyles %}{% endblock %}
+    {% block extrascripts %}{% endblock %}
+</head>
+<body>
+    <header>{% block header %}{% endblock %}</header>
+    {% block content %}{% endblock %}
+    <footer>{% block footer %}{% endblock %}</footer>
+    <nav>{% block nav %}{% endblock %}</nav>
+</body>
+</html>

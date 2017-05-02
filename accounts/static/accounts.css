@@ -1,0 +1,17 @@
+.avatar {
+    float: left;
+    padding-top: 5px;
+    padding-right: 5px;
+}
+
+.user-block {
+    clear: both;
+}
+
+.user-short-info {
+    padding: 10px;
+}
+
+.marked {
+    color: red;
+}
