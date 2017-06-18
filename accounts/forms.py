@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
+from django.forms import ImageField
 from django.utils.translation import ugettext as _
 
 from accounts.models import UserProfile
@@ -59,3 +60,7 @@ class UserProfileInfoForm(forms.ModelForm):
     class Meta:
         model = UserProfile
         fields = ('birthday', 'language')
+
+
+class AvatarForm(forms.Form):
+    avatar = ImageField(label=_('Avatar'))

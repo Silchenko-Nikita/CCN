@@ -54,12 +54,14 @@ THIRD_PARTY_APPS = [
     'widget_tweaks',
     'rest_framework',
     'channels',
+    'redactor',
 ]
 
 LOCAL_APPS = [
     'general',
     'accounts',
     'chat',
+    'workspace',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -213,3 +215,6 @@ API_PREFIX = get_env_variable('API_PREFIX')
 SEARCH_PARAM = 'q'
 
 HOST_DOMAIN = get_env_variable('HOST_DOMAIN')
+
+REDACTOR_OPTIONS = {'lang': 'en'}
+REDACTOR_UPLOAD = 'uploads/'

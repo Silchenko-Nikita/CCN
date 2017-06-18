@@ -1,20 +1,9 @@
 {% extends 'registration/logreg.html' %}
 
-{% load widget_tweaks i18n %}
+{% load i18n %}
 
 {% block form_header %}{% blocktrans %}Register your account{% endblocktrans %}{% endblock %}
 
-{% block form_fields %}
-    {% for field in form %}
-        {% render_field field placeholder=field.label %}
-        {% for error in field.errors %}
-            <div class="alert">
-                <p>{{ error|escape }}</p>
-            </div>
-        {% endfor %}
-    {% endfor %}
-{% endblock %}
-
 {% block submit_val %}{% trans "Register" %}{% endblock %}
 
-{% block additions %}<a href="{% url "login" %}">{% trans "Login" %}</a>{% endblock %}
+{% block form_additions %} or <a href="{% url "login" %}">{% trans "Login" %}</a>{% endblock %}

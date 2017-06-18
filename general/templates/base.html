@@ -4,19 +4,34 @@
 {% load i18n static %}
 
 <head>
-    <meta charset="UTF-8">
-    <title>{% block title %}{% endblock %}</title>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <meta charset="UTF-8">
+  <title>{% block title %}{% endblock %}</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 {#    <script language="javascript" type="text/javascript" href="{% static 'third_party/jquery-3.2.1.min.js' %}"></script>#}
-    <link type="text/css" rel="stylesheet" href="{% static 'main.css' %}">
-    {% block extrahead %}{% endblock %}
-    {% block extrastyles %}{% endblock %}
-    {% block extrascripts %}{% endblock %}
+
+  <link type="text/css" rel="stylesheet"  href="{% static 'third_party/foundation/css/foundation.css' %}">
+  <link type="text/css" rel="stylesheet"  href="{% static 'third_party/foundation/css/app.css' %}">
+  <link type="text/css" rel="stylesheet" href="{% static 'main.css' %}">
+
+  {% block extrahead %}{% endblock %}
+  {% block extrastyles %}{% endblock %}
+  {% block extrascripts %}{% endblock %}
 </head>
 <body>
-    <header>{% block header %}{% endblock %}</header>
+
+    {% block top_bar %}{% include 'includes/top_bar.html' %}{% endblock %}
+    {% block header %}{% endblock %}
+    {% block beforecontent %}{% endblock %}
     {% block content %}{% endblock %}
-    <footer>{% block footer %}{% endblock %}</footer>
-    <nav>{% block nav %}{% endblock %}</nav>
+    {% block aftercontent %}{% endblock %}
+    {% block footer %}{% endblock %}
+    {% block nav %}{% endblock %}
+
+  <script src='{% static "third_party/foundation/js/vendor/jquery.js" %}'></script>
+  <script src='{% static "third_party/foundation/js/vendor/foundation.js" %}'></script>
+  <script src='{% static "third_party/foundation/js/vendor/what-input.js" %}'></script>
+  <script>
+    $(document).foundation();
+  </script>
 </body>
 </html>

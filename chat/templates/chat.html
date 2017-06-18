@@ -1,28 +1,41 @@
 {% extends 'base.html' %}
 
+{% load i18n %}
+
 {% block extrascripts %}
-    <script>
-        $(document).ready(function(){
-            var msgArea = $('#msgArea');
-            var elementMessage = $('#message');
-            var webSocket = new WebSocket('ws://' + window.location.host + '/chat/');
-            webSocket.onmessage = function(message) {
-                var data = JSON.parse(message.data);
-                msgArea.append('<p><strong>'+ data.sender + '</strong>: ' + data.message + '</p>');
-            };
-            $('#btnSubmit').click(function(e) {
-                webSocket.send(elementMessage.val());
-            })
-        })
-    </script>
+  {% include 'reload_on_refresh.html' %}
+  <script>
+    $(document).ready(function(){
+      var msgArea = $('#msgArea');
+      var elementMessage = $('#message');
+      var webSocket = new WebSocket('ws://' + window.location.host + '/chat/' + {{ chat.id }} + '/');
+      webSocket.onmessage = function(message) {
+        var data = JSON.parse(message.data);
+        msgArea.append('<div><a href="' + data.sender.profile_view + '"><p><strong>'+ data.sender.username + '</strong></a>: ' + data.message + '</p></div>');
+      };
+      $('#btnSubmit').click(function(e) {
+        webSocket.send(elementMessage.val());
+      });
+    });
+  </script>
 {% endblock %}
 
 {% block content %}
-<div id="msgArea"></div>
+  <div class="row">
+    <div class="small-8 small-centered">
+      <div style="padding-top: 20px;">
+        <div id="msgArea">
+          {% for message in chat.messages.all %}
+            <div><p><a href="{{ message.author.profile.get_view_url }}"><strong>{{ message.author }}</strong></a>: {{ message.text }}</p></div>
+          {% endfor %}
+        </div>
 
-<div>
-    <textarea name="message" id="message" cols="60" rows="10"></textarea>
-</div>
+        <div>
+          <textarea name="message" id="message" style="width: 100%; height: 120px"></textarea>
+        </div>
 
-<button id="btnSubmit">Submit</button>
+        <button class="button" id="btnSubmit">{% trans "Submit" %}</button>
+      </div>
+    </div>
+  </div>
 {% endblock %}

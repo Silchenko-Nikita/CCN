@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block extrascripts %}
+  <script>
+    $(document).ready(function(){
+
+    });
+  </script>
+{% endblock %}
+
+{% block content %}
+  <div class="row" style="padding-top: 5px">
+    <div class="small-12">
+      <form method="post">
+        {% csrf_token %}
+        <div>
+          {{ form.title }}
+          {{ form.content }}
+{#          <input type="text" name="title">#}
+{#          <textarea name="content" style="height: 400px">{{ compos.master.content }}</textarea>#}
+        </div>
+
+        <button class="button float-right" type="submit">Save</button>
+      </form>
+    </div>
+  </div>
+{% endblock %}

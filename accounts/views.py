@@ -1,7 +1,7 @@
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
-from django.contrib.auth.views import LoginView, login
+from django.contrib.auth.views import LoginView, login, logout as dj_logout
 from django.forms import model_to_dict
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
@@ -11,7 +11,7 @@ from django.views.generic import FormView
 from django.views.generic import ListView
 from django.views.generic import TemplateView
 
-from accounts.forms import EmailAuthenticationForm, RegistrationForm, UserProfileInfoForm
+from accounts.forms import EmailAuthenticationForm, RegistrationForm, UserProfileInfoForm, AvatarForm
 from accounts.models import UserProfile
 
 
@@ -22,6 +22,7 @@ class ProfileView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         context['user'] = self.request.user
         context['is_owner'] = True
+        context['avatar_form'] = AvatarForm()
         context['profile_info_form'] = UserProfileInfoForm(data=model_to_dict(self.request.user.profile))
         return context
 
@@ -31,7 +32,7 @@ class GuestProfileView(LoginRequiredMixin, DetailView):
     model = User
 
     def get(self, request, pk, *args, **kwargs):
-        if self.request.user.id == int(pk):
+        if self.request.user.profile.id == int(pk):
             return HttpResponseRedirect(reverse_lazy('profile'))
         return super().get(request, *args, **kwargs)
 
@@ -72,3 +73,19 @@ class EmailLoginView(LoginView):
     # extra_context = {"next": reverse_lazy("home")}
 
     form_class = EmailAuthenticationForm
+
+
+def logout(request):
+    dj_logout(request)
+    return redirect(reverse_lazy('index'))
+
+
+class AvatarFormView(LoginRequiredMixin, FormView):
+    success_url = reverse_lazy('profile')
+    template_name = 'profile.html'
+    form_class = AvatarForm
+
+    def form_valid(self, form):
+        self.request.user.profile.avatar = form.cleaned_data['avatar']
+        self.request.user.profile.save()
+        return super().form_valid(form)

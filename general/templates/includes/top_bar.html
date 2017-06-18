@@ -1,0 +1,26 @@
+<div class="title-bar" data-responsive-toggle="example-menu" data-hide-for="medium">
+  <button class="menu-icon" data-toggle></button>
+  <div class="title-bar-title title-bar-right">Adapt das</div>
+</div>
+
+<div class="top-bar">
+  <div class="top-bar-left">
+    <ul class="menu">
+      <li class="menu-text"><a href="{% if not request.user.is_authenticated %}{% url 'index' %}
+{% else %}{% url 'profile' %}{% endif %}">Home</a></li>
+      <li><a href="{% url 'workspace-home' %}">Workspace</a></li>
+    </ul>
+  </div>
+  <div class="top-bar-right">
+    <ul class="menu">
+      {% if request.user.is_authenticated %}
+        <li><input type="search" placeholder="Search"></li>
+        <li><button class="button">Search</button></li>
+        <li><a href="{% url 'logout' %}">Log out</a></li>
+      {% else %}
+        <li><a href="{% url 'login' %}">Log in</a></li>
+        <li><a href="{% url 'register' %}">Register</a></li>
+      {% endif %}
+    </ul>
+  </div>
+</div>

@@ -1,0 +1,13 @@
+{% extends "side_nav.html" %}
+
+{% load i18n %}
+
+{% block content_to_right %}
+  <div>
+    {% for literary_compos in literary_composes %}
+      <p><a href="{{ literary_compos.get_view_url }}">{{ literary_compos.master.title }}</a> (Created: {{ literary_compos.master.created }},
+        Updated last time: {{ literary_compos.master.updated }})</p>
+    {% endfor %}
+  </div>
+  <a href="{% url 'literary-compos-new' %}">{% trans "New literary composition" %}</a>
+{% endblock %}

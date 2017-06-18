@@ -4,6 +4,8 @@ from django.conf.global_settings import LANGUAGES
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models.signals import post_save
+from django.urls import reverse
+from django.urls import reverse_lazy
 from django.utils.translation import ugettext as _
 
 from general.models import CreatedUpdatedModel
@@ -19,7 +21,11 @@ class UserProfile(CreatedUpdatedModel):
     user = models.OneToOneField(User, related_name='profile', unique=True)
     birthday = models.DateField(blank=True, null=True)
     language = models.CharField(max_length=2, choices=LANGUAGES, default='ru')
-    avatar = models.ImageField(upload_to=AVATAR_PATH, default=DEFAULT_AVATAR)
+    avatar = models.ImageField(verbose_name=_('Avatar'), upload_to=AVATAR_PATH, default=DEFAULT_AVATAR)
+
+    @property
+    def get_view_url(self):
+        return reverse('guest-profile', kwargs={'pk': self.id})
 
     def __str__(self):
         return str(self.user) + " profile"

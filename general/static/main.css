@@ -5,3 +5,39 @@
 .alert {
     color: red;
 }
+
+.bordered {
+    border: 1px solid black;
+}
+
+.side-nav > li {
+    width: 100%;
+}
+
+.side-nav > li:hover{
+    background-color: #e7e4e9;
+}
+
+.top-bar li:hover {
+    background-color: #e7e4e9;
+}
+
+html, body{
+   margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+.full-height {
+    height: 100%;
+}
+
+.side-nav{
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: #f7f7f7;
+    /*padding-top: 1rem;*/
+    /*padding-bottom: 100px;*/
+    /*overflow-y: scroll;*/
+}

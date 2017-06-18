@@ -1,26 +1,10 @@
 {% extends 'registration/logreg.html' %}
 
-{% load widget_tweaks i18n %}
+{% load i18n %}
 {% trans 'Username or email' as username_or_email %}
 
 {% block form_header %}{% blocktrans %}Login to your account{% endblocktrans %}{% endblock %}
 
-{% block form_fields %}
-    {% render_field form.username placeholder=username_or_email %}
-    {% for error in form.username.errors %}
-        <div class="alert">
-            <p>{{ error|escape }}</p>
-        </div>
-    {% endfor %}
-
-    {% render_field form.password placeholder=form.password.label %}
-    {% for error in field.errors %}
-        <div class="alert">
-            <p>{{ field.errors|escape }}</p>
-        </div>
-    {% endfor %}
-{% endblock %}
-
 {% block submit_val %}{% trans "Login" %}{% endblock %}
 
-{% block additions %}<a href="{% url "register" %}">{% trans "Register" %}</a>{% endblock %}
+{% block form_additions %} or <a href="{% url "register" %}">{% trans "Register" %}</a>{% endblock %}
