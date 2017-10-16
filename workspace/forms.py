@@ -18,3 +18,17 @@ class LiteraryComposForm(ModelForm):
 
         self.fields['content'].widget.attrs.update({'style': 'height: 400px', 'placeholder': _('Composition')})
         self.fields['content'].initial = self.instance.get_content()
+
+    def commit(self, branch=None):
+        if self.is_valid():
+            if not self.instance.pk:
+                self.instance.branch = branch
+                self.instance.title = self.cleaned_data['title']
+                self.instance.content = self.cleaned_data['content']
+                self.instance.save(commit=True)
+                return self.instance
+            else:
+                return ComposCommit.objects.create(title=self.cleaned_data['title'],
+                                                   content=self.cleaned_data['content'],
+                                                   parent=self.instance,
+                                                   branch=branch)

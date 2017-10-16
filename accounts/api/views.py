@@ -9,7 +9,7 @@ from accounts.api.serializers import UserSerializer
 
 class UserViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly, )
-    queryset = User.objects.all()
+    queryset = User.objects.filter(is_superuser=False)
     serializer_class = UserSerializer
     pagination_class = LimitOffsetPagination
     filter_backends = (filters.SearchFilter,)

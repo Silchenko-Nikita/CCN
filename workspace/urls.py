@@ -8,11 +8,11 @@ urlpatterns = [
         LiteraryComposView.as_view(),
         name="literary-compos"),
 
-    url(r'^literary-compos/(?P<compos_id>[0-9]+)/branch/(?P<branch_id>[0-9]+)/$',
+    url(r'^literary-compos/(?P<compos_id>[0-9]+)/(?P<branch_id>[0-9]+)/$',
         LiteraryComposView.as_view(),
         name="literary-compos-branch"),
 
-    url(r'^literary-compos/(?P<compos_id>[0-9]+)/branch/(?P<branch_id>[0-9]+)/commit/(?P<commit_id>[0-9]+)/$',
+    url(r'^literary-compos/(?P<compos_id>[0-9]+)/(?P<branch_id>[0-9]+)/(?P<commit_id>[0-9]+)/$',
         LiteraryComposView.as_view(),
         name="literary-compos-commit"),
 

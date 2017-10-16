@@ -9,7 +9,7 @@ class ComposBranchManager(models.Manager):
 
         obj.title = title
         obj.content = content
-        obj.save(commit=True, force_insert=True, using=self.db)
+        obj.save(force_insert=True, using=self.db)
         return obj
 
 
