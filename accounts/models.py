@@ -23,8 +23,7 @@ class UserProfile(CreatedUpdatedModel):
     language = models.CharField(max_length=2, choices=LANGUAGES, default='ru')
     avatar = models.ImageField(verbose_name=_('Avatar'), upload_to=AVATAR_PATH, default=DEFAULT_AVATAR)
 
-    @property
-    def get_view_url(self):
+    def get_absolute_url(self):
         return reverse('guest-profile', kwargs={'pk': self.id})
 
     def __str__(self):

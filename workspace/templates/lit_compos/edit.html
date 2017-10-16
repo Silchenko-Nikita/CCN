@@ -1,23 +1,84 @@
 {% extends 'base.html' %}
 
+{% load i18n static %}
+
 {% block extrascripts %}
+  <script src="{% static 'third_party/gitgraph/gitgraph.min.js' %}"></script>
   <script>
     $(document).ready(function(){
+      let myTemplateConfig = {
+        commit: {
+          shouldDisplayTooltipsInCompactMode: true,
+          tooltipHTMLFormatter: function ( commit ) {
+            return commit.message;
+          }
+        }
+      };
 
+      let myTemplate = new GitGraph.Template( myTemplateConfig );
+
+      let gitgraph = new GitGraph({
+        template: myTemplate,
+        orientation: 'horizontal-reverse',
+      });
+
+      gitgraph.canvas.addEventListener( "commit:mouseover", function ( event ) {
+        this.style.cursor = "pointer";
+      } );
+
+      gitgraph.canvas.addEventListener("commit:mouseout", function (event) {
+        this.style.cursor = "auto";
+      });
+
+      let tree = {{ tree }};
+
+      let branchesDict = {
+
+      };
+
+      function displayTree(tree, parent_branch_id) {
+          let branch_id = tree['branch_id'];
+          let commit_id = tree['commit_id'];
+          if (!branchesDict[branch_id]){
+          branchesDict[branch_id] = gitgraph.branch(branch_id);
+        } else {
+          branchesDict[branch_id].checkout();
+        }
+
+        gitgraph.commit({
+            message: tree['title'] + ' (commit + ' + commit_id + ')',
+            onClick: function(commit) {
+{#              window.location = ;#}
+            }
+          });
+
+        let children = tree['children'];
+        children.sort((a, b) => a['branch_id'] === parent_branch_id);
+
+        for (child of children){
+          displayTree(child, branch_id);
+        }
+      }
+
+      displayTree(tree);
     });
   </script>
+{% endblock %}
+
+{% block extrastyles %}
+  <link rel="stylesheet" type="text/css" href="{% static 'third_party/gitgraph/gitgraph.css' %}" />
 {% endblock %}
 
 {% block content %}
   <div class="row" style="padding-top: 5px">
     <div class="small-12">
+      <canvas id="gitGraph"></canvas>
+
       <form method="post">
         {% csrf_token %}
         <div>
           {{ form.title }}
           {{ form.content }}
-{#          <input type="text" name="title">#}
-{#          <textarea name="content" style="height: 400px">{{ compos.master.content }}</textarea>#}
         </div>
 
         <button class="button float-right" type="submit">Save</button>

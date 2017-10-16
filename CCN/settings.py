@@ -218,3 +218,6 @@ HOST_DOMAIN = get_env_variable('HOST_DOMAIN')
 
 REDACTOR_OPTIONS = {'lang': 'en'}
 REDACTOR_UPLOAD = 'uploads/'
+
+COMPOSES_DIR = 'composes/'
+LITERARY_COMPOSES_DIR = 'literary/'

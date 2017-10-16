@@ -17,65 +17,51 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='HistoricalLiteraryComposBranch',
-            fields=[
-                ('id', models.IntegerField(auto_created=True, blank=True, db_index=True, verbose_name='ID')),
-                ('created', models.DateTimeField(blank=True, editable=False)),
-                ('updated', models.DateTimeField(blank=True, editable=False)),
-                ('title', models.CharField(max_length=512)),
-                ('content', models.TextField()),
-                ('history_id', models.AutoField(primary_key=True, serialize=False)),
-                ('history_date', models.DateTimeField()),
-                ('history_type', models.CharField(choices=[('+', 'Created'), ('~', 'Changed'), ('-', 'Deleted')], max_length=1)),
-                ('author', models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to=settings.AUTH_USER_MODEL)),
-                ('changed_by', models.ForeignKey(blank=True, db_constraint=False, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', to=settings.AUTH_USER_MODEL)),
-            ],
-            options={
-                'verbose_name': 'historical literary compos branch',
-                'ordering': ('-history_date', '-history_id'),
-                'get_latest_by': 'history_date',
-            },
-        ),
-        migrations.CreateModel(
-            name='LiteraryCompos',
+            name='Compos',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
-                ('title', models.CharField(max_length=512)),
+                ('title', models.CharField(blank=True, max_length=512, null=True)),
+                ('author', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='composes',
+                                             to=settings.AUTH_USER_MODEL)),
             ],
             options={
                 'abstract': False,
             },
         ),
         migrations.CreateModel(
-            name='LiteraryComposBranch',
+            name='ComposBranch',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
-                ('title', models.CharField(max_length=512)),
-                ('content', models.TextField()),
-                ('author', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='literary_composes', to=settings.AUTH_USER_MODEL)),
-                ('changed_by', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='changed_literary_composes', to=settings.AUTH_USER_MODEL)),
+                ('branch_id', models.IntegerField()),
+                ('tag', models.CharField(blank=True, max_length=512)),
+                ('author', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('compos', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='branches',
+                                             to='workspace.Compos')),
             ],
-            options={
-                'abstract': False,
-            },
         ),
-        migrations.AddField(
-            model_name='literarycompos',
-            name='master',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='workspace.LiteraryComposBranch'),
+        migrations.CreateModel(
+            name='ComposCommit',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('created', models.DateTimeField(auto_now_add=True)),
+                ('updated', models.DateTimeField(auto_now=True)),
+                ('commit_id', models.IntegerField()),
+                ('tag', models.CharField(blank=True, max_length=512)),
+                ('title', models.CharField(max_length=512)),
+                ('branch', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='commits',
+                                             to='workspace.ComposBranch')),
+            ],
         ),
-        migrations.AddField(
-            model_name='historicalliterarycomposbranch',
-            name='child_branches',
-            field=models.ManyToManyField(related_name='parents', to='workspace.LiteraryComposBranch'),
+        migrations.AlterUniqueTogether(
+            name='composcommit',
+            unique_together=set([('tag', 'branch'), ('commit_id', 'branch')]),
         ),
-        migrations.AddField(
-            model_name='historicalliterarycomposbranch',
-            name='history_user',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to=settings.AUTH_USER_MODEL),
+        migrations.AlterUniqueTogether(
+            name='composbranch',
+            unique_together=set([('tag', 'compos'), ('branch_id', 'compos')]),
         ),
     ]
