@@ -1,5 +1,6 @@
 appdirs==1.4.3
-asgiref==1.1.1
+asgi-redis==1.4.3
+asgiref==1.1.2
 attrs==16.3.0
 autobahn==17.5.1
 Automat==0.5.0
@@ -9,9 +10,12 @@ Cython==0.25.2
 daphne==1.2.0
 dj-database-url==0.4.2
 Django==1.11
+django-ckeditor==5.3.1
 django-filter==1.0.2
+django-js-asset==0.1.1
 django-nicedit==1.1.1
 django-simple-history==1.8.2
+django-summernote==0.8.8.2
 django-widget-tweaks==1.4.1
 django-wysiwyg-redactor==0.5.1
 djangorestframework==3.6.2
@@ -20,6 +24,7 @@ gitdb2==2.0.2
 GitPython==2.1.5
 gunicorn==19.7.1
 incremental==16.10.1
+msgpack-python==0.4.8
 numpy==1.13.0
 olefile==0.44
 packaging==16.8
@@ -28,6 +33,7 @@ psycopg2==2.7.1
 pyparsing==2.2.0
 pystan==2.15.0.1
 pytz==2017.2
+redis==2.10.6
 sh==1.12.14
 six==1.10.0
 smmap2==2.0.3

@@ -44,21 +44,35 @@
 
         let branch_id = commit_el['branch_id'];
         let commit_id = commit_el['commit_id'];
+
+        if (parent_branch_id){
+          branchesDict[parent_branch_id].checkout();
+        }
+
         if (!branchesDict[branch_id]){
           branchesDict[branch_id] = gitgraph.branch(branch_id);
         } else {
           branchesDict[branch_id].checkout();
         }
 
-        gitgraph.commit({
-            message: commit_el['title'] + ' (commit ' + commit_id + ')',
+        let commitConfig = {
+            message: commit_el['title'] + ' (commit ' + commit_id + ', msg: ' + commit_el['commit_message'] + ')',
             onClick: function(commit) {
               window.location = root + commit_el['absolute_url'];
-            }
-          });
+            },
+          };
+
+        if (branch_id == {{ branch_id }} && commit_id == {{ commit_id }}) {
+          commitConfig['dotColor'] = "white";
+          commitConfig['dotSize'] = 2;
+          commitConfig['dotStrokeWidth'] = 2;
+        }
+
+        gitgraph.commit(commitConfig);
 
         let children = commit_el['children'];
-        children.sort((a, b) => a['branch_id'] === parent_branch_id);
+        children.sort((a, b) => a['branch_id'] < b['branch_id']);
+        console.dir(children);
 
         for (child of children){
           displayTree(child, branch_id);
@@ -66,6 +80,18 @@
       }
 
       displayTree(tree);
+
+      ///
+
+      function onUpdate(event) {
+       event.preventDefault();
+       let form = document.getElementById("commit-form-id");
+       form.setAttribute('action', '?update_commit=true');
+       form.submit();
+      }
+
+      let updateBtn = document.getElementById("update-btn-id");
+      updateBtn.addEventListener("click", onUpdate);
     });
   </script>
 {% endblock %}
@@ -76,18 +102,57 @@
 
 {% block content %}
   <div class="row" style="padding-top: 5px">
-    <div class="small-12">
-      <canvas id="gitGraph" hidden></canvas>
+    <canvas id="gitGraph" hidden></canvas>
+  </div>
 
-      <form method="post">
+  {% if compos_title_form %}
+    <form method="post" action="{% url 'literary-compos-update' compos_id branch_id commit_id %}">
+    {% csrf_token %}
+      <div class="row" style="padding-top: 15px">
+        <div class="column small-10">
+          {{ compos_title_form.title }}
+        </div>
+        <div class="column small-2">
+          <button class="button float-right" id="commit-btn-id" name="commit-btn" type="submit">Update title</button>
+        </div>
+      </div>
+    </form>
+  {% endif %}
+
+  <form method="post" id="commit-form-id">
+    <div class="row">
+      <div class="column small-12">
         {% csrf_token %}
         <div>
+          {{ form.media }}
           {{ form.title }}
           {{ form.content }}
         </div>
-
-        <button class="button float-right" type="submit">Save</button>
-      </form>
+      </div>
     </div>
-  </div>
+
+    {% if commit_id %}
+      <div class="row" style="padding-top: 15px">
+        <div class="column small-offset-4 small-6">
+          {{ form.commit_message }}
+        </div>
+        <div class="column small-1">
+          <button class="button float-right" id="update-btn-id" name="update-btn" type="submit">Update</button>
+        </div>
+        <div class="column small-1">
+          <button class="button float-right" id="commit-btn-id" name="commit-btn" type="submit">Commit</button>
+        </div>
+      </div>
+    {% else %}
+      <div class="row" style="padding-top: 15px">
+        <div class="column small-offset-5 small-6">
+          {{ form.commit_message }}
+        </div>
+        <div class="column small-1">
+          <button class="button float-right" id="commit-btn-id" name="commit-btn" type="submit">Commit</button>
+        </div>
+      </div>
+    {% endif %}
+
+  </form>
 {% endblock %}

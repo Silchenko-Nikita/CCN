@@ -1,3 +1,4 @@
 CONTENT_FILE = 'content'
 METADATA_FILE = 'meta.json'
-INITIAL_COMMIT_M = 'initial'
+DEFAULT_COMMIT_MESSAGE = 'commit message'
+DEFAULT_COMPOS_TITLE = 'New composition'

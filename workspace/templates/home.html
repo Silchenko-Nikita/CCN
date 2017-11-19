@@ -5,7 +5,7 @@
 {% block content_to_right %}
   <div>
     {% for literary_compos in literary_composes %}
-      <p><a href="{{ literary_compos.get_absolute_url }}">{{ literary_compos.title }}</a>
+      <p><a href="{{ literary_compos.get_absolute_url }}">{{ literary_compos }}</a>
 {#        (Created:#}
 {#        {{ literary_compos.created }},#}
 {#        Updated last time: {{ literary_compos.updated }})</p>#}

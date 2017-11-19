@@ -27,8 +27,11 @@ urlpatterns = [
     url(r'^{}accounts/'.format(API_PREFIX), include('accounts.api.urls')),
     url(r'^chat/', include('chat.urls')),
     url(r'^workspace/', include('workspace.urls')),
-    url(r'^redactor/', include('redactor.urls')),
     url(r'^', include('general.urls')),
+
+    url(r'^redactor/', include('redactor.urls')),
+    url(r'^ckeditor/', include('ckeditor_uploader.urls')),
 ]
+
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

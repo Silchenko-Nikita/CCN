@@ -22,7 +22,7 @@ PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
-SECRET_KEY = '%knha*14o84n9n-2njdi5d&7vk(er9wih*p!2k$o31_-scqql#'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'SECRET_KEY')
 
 DEBUG = True
 
@@ -46,6 +46,7 @@ THIRD_PARTY_APPS = [
     'rest_framework',
     'channels',
     'redactor',
+    'ckeditor'
 ]
 
 LOCAL_APPS = [
@@ -93,10 +94,19 @@ WSGI_APPLICATION = 'CCN.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
+DATABASE_HOST = os.environ.get('DATABASE_HOST')
+DATABASE_PORT = os.environ.get('DATABASE_PORT')
+DATABASE_USER = os.environ.get('DATABASE_USER')
+DATABASE_PASSWORD = os.environ.get('DATABASE_PASSWORD')
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'ccn_db',
+        'USER': DATABASE_USER,
+        'PORT': DATABASE_PORT,
+        'HOST': DATABASE_HOST,
+        'PASSWORD': DATABASE_PASSWORD,
     }
 }
 
@@ -184,6 +194,34 @@ LOGGING = {
     }
 }
 
+
+CKEDITOR_CONFIGS = {
+    'default': {
+        'height': 300,
+        'width': '100%',
+        'skin': 'moono',
+        'toolbar_CustomConfig': [
+            {'name': 'customtools', 'items': ['Source', 'Preview', 'Maximize',]},
+            {'name': 'clipboard', 'items': ['Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', '-', 'Undo', 'Redo']},
+            {'name': 'editing', 'items': ['Find', 'Replace', '-', 'SelectAll']},
+            '/',
+            {'name': 'basicstyles',
+             'items': ['Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', '-', 'RemoveFormat']},
+            {'name': 'paragraph',
+             'items': ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote', '-',
+                       'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock', '-', 'BidiLtr', 'BidiRtl']},
+            {'name': 'links', 'items': ['Link', 'Unlink']},
+            {'name': 'insert',
+             'items': ['Image', 'Table', 'HorizontalRule', 'Smiley', 'SpecialChar']},
+            '/',
+            {'name': 'styles', 'items': ['Styles', 'Format', 'Font', 'FontSize']},
+            {'name': 'colors', 'items': ['TextColor', 'BGColor']},
+        ],
+        'toolbar': 'CustomConfig',
+        'tabSpaces': 4,
+    }
+}
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
@@ -211,3 +249,5 @@ COMPOSES_DIR = 'composes/'
 LITERARY_COMPOSES_DIR = 'literary/'
 
 STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
+
+CKEDITOR_UPLOAD_PATH = "ckeditor/uploads/"
