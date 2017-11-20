@@ -3,13 +3,45 @@
 {% load i18n %}
 
 {% block content_to_right %}
-  <div>
-    {% for literary_compos in literary_composes %}
-      <p><a href="{{ literary_compos.get_absolute_url }}">{{ literary_compos }}</a>
-{#        (Created:#}
-{#        {{ literary_compos.created }},#}
-{#        Updated last time: {{ literary_compos.updated }})</p>#}
-    {% endfor %}
+  <div style="padding-top: 20px;"></div>
+  {% for literary_compos in literary_composes %}
+    <div class="row">
+      <div class="column small-12">
+        <p><a href="{{ literary_compos.get_absolute_url }}">{{ literary_compos }}</a>
+          (Created: {{ literary_compos.created }})
+          <button href="#" data-open="deleteModal-{{ literary_compos.compos_id }}" class="button smtinyall alert float-right">
+            {% trans "Delete" %}
+          </button>
+        </p>
+        <hr>
+      </div>
+    </div>
+
+    <div class="tiny reveal" id="deleteModal-{{ literary_compos.compos_id }}" data-reveal>
+      <p>Are you sure you that you want to delete {{ literary_compos }}?</p>
+      <button class="close-button" data-close aria-label="Clole modal" type="button">
+        <span class="true">&times;</span>
+      </button>
+
+      <form method="post" action="{% url 'literary-compos-delete' literary_compos.compos_id %}">
+        {% csrf_token %}
+        <div class="text-center">
+          <button type="submit" class="button smtinyall alert">
+            <span>Delete</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  {% endfor %}
+  <div class="row">
+    <div class="column small-12">
+      <p>
+        <a href="{% url 'literary-compos-new' %}">
+          <button class="button">
+            {% trans "New literary composition" %}
+          </button>
+        </a>
+      </p>
+    </div>
   </div>
-  <a href="{% url 'literary-compos-new' %}">{% trans "New literary composition" %}</a>
 {% endblock %}

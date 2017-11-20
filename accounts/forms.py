@@ -57,9 +57,13 @@ class EmailAuthenticationForm(AuthenticationForm):
 
 class UserProfileInfoForm(forms.ModelForm):
 
+    def clean_birthday(self):
+        birthday = self.cleaned_data['birthday']
+        print(birthday)
+
     class Meta:
         model = UserProfile
-        fields = ('birthday', 'language')
+        fields = ('birthday', 'language', 'about_me')
 
 
 class AvatarForm(forms.Form):

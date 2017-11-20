@@ -1,5 +1,6 @@
 from django.http import Http404
 
+from general.consts import OBJECT_STATUS_ACTIVE
 from workspace.models import Compos
 
 
@@ -15,3 +16,6 @@ class LiteraryComposViewMixin:
 
     def get_object(self, queryset=None):
         return self.get_compos()
+
+    def get_queryset(self):
+        return self.model.objects.filter(author=self.request.user, status=OBJECT_STATUS_ACTIVE)

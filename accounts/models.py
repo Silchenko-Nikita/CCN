@@ -21,6 +21,7 @@ class UserProfile(CreatedUpdatedModel):
     user = models.OneToOneField(User, related_name='profile', unique=True)
     birthday = models.DateField(blank=True, null=True)
     language = models.CharField(max_length=2, choices=LANGUAGES, default='ru')
+    about_me = models.TextField(blank=True, null=True)
     avatar = models.ImageField(verbose_name=_('Avatar'), upload_to=AVATAR_PATH, default=DEFAULT_AVATAR)
 
     def get_absolute_url(self):

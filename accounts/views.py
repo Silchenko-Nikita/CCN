@@ -10,6 +10,7 @@ from django.views.generic import DetailView
 from django.views.generic import FormView
 from django.views.generic import ListView
 from django.views.generic import TemplateView
+from django.views.generic import UpdateView
 
 from accounts.forms import EmailAuthenticationForm, RegistrationForm, UserProfileInfoForm, AvatarForm
 from accounts.models import UserProfile
@@ -54,6 +55,21 @@ class RegisterFormView(FormView):
 
         login(self.request, user)
         return super(RegisterFormView, self).form_valid(form)
+
+
+class UserProfileInfoView(UpdateView):
+    form_class = UserProfileInfoForm
+    model = UserProfile
+    success_url = reverse_lazy('profile')
+    template_name = "user_profile_info.html"
+
+    def get_object(self, queryset=None):
+        return self.request.user.profile
+
+    def form_valid(self, form):
+        form.save()
+
+        return super().form_valid(form)
 
 
 class SearchView(ListView):

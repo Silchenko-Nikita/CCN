@@ -2,6 +2,21 @@
 
 {% load i18n %}
 
+{% block extrastyles %}
+  <style>
+    .profile-data-label {
+      display: inline-block;
+      width: 100px;
+    }
+  </style>
+  <style>
+    .profile-data {
+      cursor: default;
+      resize: none;
+    }
+  </style>
+{% endblock %}
+
 {% block content_to_right %}
   <div class="row">
     <h4 style="text-align: center;">{{ user.username }} ({{ user.first_name }} {{ user.last_name }})</h4>
@@ -11,21 +26,48 @@
     <div class="columns small-5 large-4">
       {% if is_owner %}
         {% include 'form_errors.html' with form=avatar_form %}
-        <form enctype="multipart/form-data" method="post" action="{% url 'avatar-upload' %}">
+        <form enctype="multipart/form-data" style="padding-bottom: 10px;" method="post" action="{% url 'avatar-upload' %}">
           {% csrf_token %}
           {{ avatar_form }}
           <input type="submit" value="submit">
         </form>
       {% endif %}
+
+      <div>
+        <a href="{% url 'new-chat' %}?users_ids={{ user.id }}{% if not is_owner %},{{ request.user.id }}{% endif %}">
+          <button class="button">{% trans "Go to chat" %}</button>
+        </a>
       </div>
+    </div>
     <div class="columns small-5 large-6">
-      <ul>
-      {% for field in profile_info_form %}
-        <li><b>{{ field.label }}:</b> {% if field.data %}{{ field.data }}{% endif %}</li>
-      {% endfor %}
-      </ul>
+      <p>
+        <b class="profile-data-label">{{ profile_info_form.birthday.label }}:</b>
+        <input style="cursor: default; padding-left: 10px;" class="profile-data"  readonly value="{% if profile_info_form.birthday.data %}{{ profile_info_form.birthday.data }}{% else %}-/-/-{% endif %}">
+      </p>
+      <p>
+        <b class="profile-data-label">{{ profile_info_form.language.label }}:</b>
+        <input style="cursor: default; padding-left: 10px;" class="profile-data"  readonly value="{% if profile_info_form.language.data %}{{ profile_info_form.language.data }}{% else %}-/-/-{% endif %}">
+      </p>
+      <p>
+        <b class="profile-data-label">{{ profile_info_form.about_me.label }}:</b>
+        <textarea style="cursor: default;" class="profile-data" rows="10" readonly>{% if profile_info_form.about_me.data %}{{ profile_info_form.about_me.data }}{% else %}{% endif %}
+        </textarea>
+      </p>
+      {% if is_owner %}
+        <div class="right-float">
+          <a href="{% url 'user-profile-info' %}">
+            <button class="button">Edit info</button>
+          </a>
+        </div>
+      {% endif %}
     </div>
   </div>
 
-  <a href="{% url 'new-chat' %}?users_ids={{ user.id }}{% if not is_owner %},{{ request.user.id }}{% endif %}">{% trans "Go to chat" %}</a>
+{#  <div class="row" style="padding-top: 10px;">#}
+{#    <div class="columns">#}
+{#      <a href="{% url 'new-chat' %}?users_ids={{ user.id }}{% if not is_owner %},{{ request.user.id }}{% endif %}">#}
+{#        <button class="button">{% trans "Go to chat" %}</button>#}
+{#      </a>#}
+{#    </div>#}
+{#  </div>#}
 {% endblock %}

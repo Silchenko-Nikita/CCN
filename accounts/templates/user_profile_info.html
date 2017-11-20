@@ -1,0 +1,44 @@
+{% extends "side_nav.html" %}
+
+{% load i18n static %}
+
+{% block extrastyles %}
+  <link type="text/css" rel="stylesheet"  href="{% static 'third_party/foundation/css/foundation-datepicker.css' %}">
+{% endblock %}
+
+{% block content_to_right %}
+  <div class="row">
+    <div class="small-centered columns">
+      <div>
+        <h4 style="text-align: center;">Profile info</h4>
+        {% include 'form_errors.html' with form=form %}
+        <form method="post">
+          {% csrf_token %}
+          {% include 'form_fields_with_errors.html' with form=form %}
+          <div class="float-right">
+            <input type="submit" class="button" style="vertical-align: middle" name="submit" value="submit">
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+{% block footer_extrascripts %}
+  <script src='{% static "third_party/foundation/js/foundation-datepicker.js" %}'></script>
+  <script>
+  $(function(){
+      $('#id_birthday').fdatepicker({
+          initialDate: '',
+          format: 'mm-dd-yyyy',
+          disableDblClickSelection: true,
+          leftArrow:'<<',
+          rightArrow:'>>',
+          closeIcon:'X',
+          closeButton: true
+      });
+  });
+  </script>
+{% endblock %}
+
+{% endblock %}
+

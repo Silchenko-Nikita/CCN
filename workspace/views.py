@@ -10,6 +10,7 @@ from django.views.generic import DetailView
 from django.views.generic import TemplateView
 from django.views.generic import UpdateView
 
+from general.consts import OBJECT_STATUS_ACTIVE, OBJECT_STATUS_DELETED
 from workspace.forms import LiteraryComposForm, LiteraryComposTitleForm
 from workspace.models import Compos, ComposCommit, ComposBranch
 from workspace.views_mixins import LiteraryComposViewMixin
@@ -20,13 +21,17 @@ class WorkspaceHome(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['literary_composes'] = Compos.objects.filter(author=self.request.user)
+        context['literary_composes'] = Compos.objects.filter(author=self.request.user,
+                                                             status=OBJECT_STATUS_ACTIVE).order_by('-id')
         return context
 
 
 class LiteraryComposTitleUpdateView(LoginRequiredMixin, LiteraryComposViewMixin, UpdateView):
     model = Compos
     context_object_name = 'compos'
+
+    def get(self, request, *args, **kwargs):
+        raise Http404
 
     def post(self, request, *args, **kwargs):
         compos = self.get_object()
@@ -43,13 +48,25 @@ class LiteraryComposTitleUpdateView(LoginRequiredMixin, LiteraryComposViewMixin,
             return redirect(reverse('literary-compos', kwargs={'compos_id': int(self.kwargs.get('compos_id'))}))
 
 
-class LiteraryComposView(LoginRequiredMixin, LiteraryComposViewMixin, DetailView):
+class LiteraryComposDeleteView(LoginRequiredMixin, LiteraryComposViewMixin, UpdateView):
     template_name = 'lit_compos/edit.html'
     model = Compos
     context_object_name = 'compos'
 
-    def get_queryset(self):
-        return self.model.objects.filter(author=self.request.user)
+    def get(self, request, *args, **kwargs):
+        raise Http404
+
+    def post(self, request, *args, **kwargs):
+        compos = self.get_object()
+        compos.status = OBJECT_STATUS_DELETED
+        compos.save()
+        return redirect(reverse('workspace-home'))
+
+
+class LiteraryComposView(LoginRequiredMixin, LiteraryComposViewMixin, DetailView):
+    template_name = 'lit_compos/edit.html'
+    model = Compos
+    context_object_name = 'compos'
 
     def get_branch(self, raise_404=True):
         compos = self.get_compos(raise_404=True)
