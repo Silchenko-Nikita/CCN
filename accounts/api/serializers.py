@@ -2,16 +2,12 @@ from django.contrib.auth.models import User
 from django.urls import reverse_lazy
 from rest_framework import serializers
 from rest_framework.fields import ImageField, URLField
+from rest_framework.relations import HyperlinkedIdentityField
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     avatar = ImageField(source='profile.avatar')
-    profile_view = URLField()
-
-    def to_representation(self, instance):
-        ret = super().to_representation(instance)
-        ret['profile_view'] = reverse_lazy('guest-profile', kwargs={"pk": instance.id})
-        return ret
+    profile_view = HyperlinkedIdentityField(view_name='guest-profile')
 
     class Meta:
         model = User
