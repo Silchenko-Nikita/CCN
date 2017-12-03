@@ -3,6 +3,7 @@ import json
 from channels.auth import channel_session_user_from_http, channel_session_user
 from channels.channel import Group
 from django.contrib.auth.models import User
+from django.forms import model_to_dict
 
 from accounts.api.serializers import UserSerializer
 from chat.models import ChatMessage, Chat
@@ -23,7 +24,6 @@ def chat_message(message, pk=0):
     )
     serializer = UserSerializer(message.user)
     sender = serializer.data
-    sender['profile_view'] = str(sender['profile_view'])
     Group('chat-{}'.format(pk)).send({'text': json.dumps({'message': message.content['text'],
                                             'sender': sender})})
 

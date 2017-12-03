@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="height: 100%">
 
 {% load i18n static %}
 
@@ -17,16 +17,19 @@
   {% block extrastyles %}{% endblock %}
   {% block extrascripts %}{% endblock %}
 </head>
-<body>
+<body style="height: 100%">
+
 
     {% block top_bar %}{% include 'includes/top_bar.html' %}{% endblock %}
-    {% block header %}{% endblock %}
-    {% block beforecontent %}{% endblock %}
-    {% block content %}{% endblock %}
-    {% block aftercontent %}{% endblock %}
-    {% block footer %}{% endblock %}
-    {% block nav %}{% endblock %}
-    {% block additions %}{% endblock %}
+    <div style="height: 80%">
+      {% block header %}{% endblock %}
+      {% block beforecontent %}{% endblock %}
+      {% block content %}{% endblock %}
+      {% block aftercontent %}{% endblock %}
+      {% block footer %}{% endblock %}
+      {% block nav %}{% endblock %}
+      {% block additions %}{% endblock %}
+    </div>
 
   <script src='{% static "third_party/foundation/js/vendor/jquery.js" %}'></script>
   <script src='{% static "third_party/foundation/js/vendor/foundation.js" %}'></script>

@@ -1,10 +1,9 @@
-from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.contrib.auth.views import LoginView, login, logout as dj_logout
 from django.forms import model_to_dict
 from django.http import HttpResponseRedirect
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import DetailView
 from django.views.generic import FormView
@@ -33,14 +32,16 @@ class GuestProfileView(LoginRequiredMixin, DetailView):
     model = User
 
     def get(self, request, pk, *args, **kwargs):
-        if self.request.user.profile.id == int(pk):
+        if self.request.user == self.get_object():
             return HttpResponseRedirect(reverse_lazy('profile'))
         return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        user = self.get_object()
+
         context['is_owner'] = False
-        context['profile_info_form'] = UserProfileInfoForm(data=model_to_dict(self.model.objects.get(id=int(self.kwargs['pk']))))
+        context['profile_info_form'] = UserProfileInfoForm(data=model_to_dict(user.profile))
         return context
 
 

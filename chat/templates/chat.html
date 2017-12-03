@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'side_nav.html' %}
 
 {% load i18n %}
 
@@ -6,35 +6,58 @@
   {% include 'reload_on_refresh.html' %}
   <script>
     $(document).ready(function(){
-      var msgArea = $('#msgArea');
-      var elementMessage = $('#message');
-      var webSocket = new WebSocket('ws://' + window.location.host + '/chat/' + {{ chat.id }} + '/');
+      let msgArea = $('#msgArea');
+      let elementMessage = $('#message');
+      let webSocket = new WebSocket('ws://' + window.location.host + '/chat/' + {{ chat.id }} + '/');
       webSocket.onmessage = function(message) {
-        var data = JSON.parse(message.data);
-        msgArea.append('<div><a href="' + data.sender.profile_view + '"><p><strong>'+ data.sender.username + '</strong></a>: ' + data.message + '</p></div>');
+        let data = JSON.parse(message.data);
+        msgArea.append('<div><a href="' + data.sender.profile_view + '">' +
+          '<strong>'+ data.sender.username + '</strong></a>: <br>' +
+          '<div style="word-wrap: break-word; white-space: pre-wrap;">'
+          + data.message + '</div></div><hr>');
+        msgArea.scrollTop(1000000);
       };
-      $('#btnSubmit').click(function(e) {
+
+      function webSocketSend() {
         webSocket.send(elementMessage.val());
+      }
+
+      $('#btnSubmit').click( function(e) {
+        webSocketSend();
       });
+      elementMessage.keydown( function(e) {
+        if (!e.shiftKey && e.keyCode == 13){
+          webSocketSend();
+          elementMessage.val('');
+          e.preventDefault();
+        }
+      });
+      msgArea.scrollTop(1000000);
     });
   </script>
 {% endblock %}
 
-{% block content %}
-  <div class="row">
-    <div class="small-8 small-centered">
-      <div style="padding-top: 20px;">
-        <div id="msgArea">
-          {% for message in chat.messages.all %}
-            <div><p><a href="{{ message.author.profile.get_absolute_url }}"><strong>{{ message.author }}</strong></a>: {{ message.text }}</p></div>
+{% block content_to_right %}
+  <div class="row" style="height: 100%;">
+    <div class="small-11 small-centered" style="height: 100%;">
+      <div style="height: 100%;">
+        <div id="msgArea" style="height: 75%; overflow-y: scroll">
+          <br>
+          {% for message in messages.all %}
+            <div><a href="{{ message.author.profile.get_absolute_url }}"><strong>{{ message.author }}</strong></a>: <br>
+              <div style="word-wrap: break-word; white-space: pre-wrap;">{{ message.text }}</div>
+            </div>
+            <hr>
           {% endfor %}
         </div>
 
-        <div>
-          <textarea name="message" id="message" style="width: 100%; height: 120px"></textarea>
-        </div>
+        <div style="height: 15%;">
+          <div>
+            <textarea name="message" placeholder="{% trans "Type a message..." %}" id="message" style="width: 100%; height: 120px"></textarea>
+          </div>
 
-        <button class="button" id="btnSubmit">{% trans "Submit" %}</button>
+          <button class="button float-right" id="btnSubmit">{% trans "Send" %}</button>
+        </div>
       </div>
     </div>
   </div>

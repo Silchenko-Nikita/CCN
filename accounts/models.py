@@ -25,7 +25,7 @@ class UserProfile(CreatedUpdatedModel):
     avatar = models.ImageField(verbose_name=_('Avatar'), upload_to=AVATAR_PATH, default=DEFAULT_AVATAR)
 
     def get_absolute_url(self):
-        return reverse('guest-profile', kwargs={'pk': self.id})
+        return reverse('guest-profile', kwargs={'pk': self.user.id})
 
     def __str__(self):
         return str(self.user) + " profile"
