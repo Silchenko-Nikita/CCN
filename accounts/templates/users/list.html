@@ -20,7 +20,7 @@
       function appendUsers(limit=lim, q=_q) {
         var total_num = 0, page_num = 0;
         $.ajax({
-          url: "{{ user_list }}?limit=" + limit + "&offset=" + offset + (q ? ('&q=' + q) : ''),
+          url: "{% url 'user-list' %}?limit=" + limit + "&offset=" + offset + (q ? ('&q=' + q) : ''),
           type: 'get',
           async: false,
           success: function(data) {

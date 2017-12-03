@@ -56,7 +56,7 @@
         }
 
         let commitConfig = {
-            message: commit_el['title'] + ' (commit ' + commit_id + ', msg: ' + commit_el['commit_message'] + ')',
+            message: commit_el['title'] + ' (branch ' + branch_id + ', commit ' + commit_id + ', msg: ' + commit_el['commit_message'] + ')',
             onClick: function(commit) {
               window.location = root + commit_el['absolute_url'];
             },

@@ -77,13 +77,6 @@ class SearchView(ListView):
     model = User
     queryset = User.objects.none()
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context.update({
-            'user_list': reverse_lazy('user-list')
-        })
-        return context
-
 
 class EmailLoginView(LoginView):
     # extra_context = {"next": reverse_lazy("home")}

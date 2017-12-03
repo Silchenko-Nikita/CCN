@@ -6,6 +6,7 @@ from django.db import models
 from django.db.models import Max
 from django.urls import reverse
 from django.utils.translation import ugettext as _
+from git import Actor
 from git import Repo
 
 from CCN.settings import MEDIA_ROOT, COMPOSES_DIR
@@ -233,13 +234,19 @@ class ComposCommit(CreatedUpdatedModel):
         with open(metadata_path, 'w') as f:
             json.dump(data, f)
 
+        repo.git.execute(['git', 'config', '--global', 'user.email', '"{}"'.format(br.author.email)])
+        repo.git.execute(['git', 'config', '--global', 'user.name', '"{}"'.format(br.author.get_full_name())])
+
         repo.index.add([CONTENT_FILE, METADATA_FILE])
 
         if self.pk:
             repo.delete_tag(self.get_commit_name)
-            repo.git.commit('-m', self.commit_message, '--amend')
+            repo.git.commit("-m", "'{}'".format(self.commit_message),
+                            "--author='{} <{}>'".format(
+                            br.author.get_full_name(), br.author.email), '--amend')
         else:
-            repo.index.commit(self.commit_message)
+            author = Actor(br.author.get_full_name(), br.author.email)
+            repo.index.commit(self.commit_message, author=author)
 
         repo.create_tag(self.get_commit_name)
 
