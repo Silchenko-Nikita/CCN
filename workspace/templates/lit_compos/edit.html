@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'side_nav.html' %}
 
 {% load i18n static %}
 
@@ -100,59 +100,63 @@
   <link rel="stylesheet" type="text/css" href="{% static 'third_party/gitgraph/gitgraph.css' %}" />
 {% endblock %}
 
-{% block content %}
-  <div class="row" style="padding-top: 5px">
-    <canvas id="gitGraph" hidden></canvas>
-  </div>
-
-  {% if compos_title_form %}
-    <form method="post" action="{% url 'literary-compos-update' compos_id branch_id commit_id %}">
-    {% csrf_token %}
-      <div class="row" style="padding-top: 15px">
-        <div class="column small-10">
-          {{ compos_title_form.title }}
-        </div>
-        <div class="column small-2">
-          <button class="button float-right" id="commit-btn-id" name="commit-btn" type="submit">Update title</button>
-        </div>
-      </div>
-    </form>
-  {% endif %}
-
-  <form method="post" id="commit-form-id">
+{% block content_to_right %}
+  <div style="height: 114%; overflow-y: scroll">
     <div class="row">
-      <div class="column small-12">
-        {% csrf_token %}
-        <div>
-          {{ form.media }}
-          {{ form.title }}
-          {{ form.content }}
-        </div>
+      <div style="width: 100%; overflow-x: auto; padding-top: 5px" class="column small-12">
+        <canvas id="gitGraph" hidden></canvas>
       </div>
     </div>
 
-    {% if commit_id %}
-      <div class="row" style="padding-top: 15px">
-        <div class="column small-offset-4 small-6">
-          {{ form.commit_message }}
+    {% if compos_title_form %}
+      <form method="post" action="{% url 'literary-compos-update' compos_id branch_id commit_id %}">
+      {% csrf_token %}
+        <div class="row" style="padding-top: 15px">
+          <div class="column small-10">
+            {{ compos_title_form.title }}
+          </div>
+          <div class="column small-2">
+            <button class="button float-right" id="commit-btn-id" name="commit-btn" type="submit">Update title</button>
+          </div>
         </div>
-        <div class="column small-1">
-          <button class="button float-right" id="update-btn-id" name="update-btn" type="submit">Update</button>
-        </div>
-        <div class="column small-1">
-          <button class="button float-right" id="commit-btn-id" name="commit-btn" type="submit">Commit</button>
-        </div>
-      </div>
-    {% else %}
-      <div class="row" style="padding-top: 15px">
-        <div class="column small-offset-5 small-6">
-          {{ form.commit_message }}
-        </div>
-        <div class="column small-1">
-          <button class="button float-right" id="commit-btn-id" name="commit-btn" type="submit">Commit</button>
-        </div>
-      </div>
+      </form>
     {% endif %}
 
-  </form>
+    <form method="post" id="commit-form-id">
+      <div class="row">
+        <div class="column small-12">
+          {% csrf_token %}
+          <div>
+            {{ form.media }}
+            {{ form.title }}
+            {{ form.content }}
+          </div>
+        </div>
+      </div>
+
+      {% if commit_id %}
+        <div class="row" style="padding-top: 15px">
+          <div class="column small-offset-4 small-6">
+            {{ form.commit_message }}
+          </div>
+          <div class="column small-1">
+            <button class="button float-right" id="update-btn-id" name="update-btn" type="submit">Update</button>
+          </div>
+          <div class="column small-1">
+            <button class="button float-right" id="commit-btn-id" name="commit-btn" type="submit">Commit</button>
+          </div>
+        </div>
+      {% else %}
+        <div class="row" style="padding-top: 15px">
+          <div class="column small-offset-5 small-6">
+            {{ form.commit_message }}
+          </div>
+          <div class="column small-1">
+            <button class="button float-right" id="commit-btn-id" name="commit-btn" type="submit">Commit</button>
+          </div>
+        </div>
+      {% endif %}
+
+    </form>
+  </div>
 {% endblock %}

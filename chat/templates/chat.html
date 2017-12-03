@@ -8,7 +8,7 @@
     $(document).ready(function(){
       let msgArea = $('#msgArea');
       let elementMessage = $('#message');
-      let webSocket = new WebSocket('ws://' + window.location.host + '/chat/' + {{ chat.id }} + '/');
+      let webSocket = new WebSocket('wss://' + window.location.host + '/chat/' + {{ chat.id }} + '/');
       webSocket.onmessage = function(message) {
         let data = JSON.parse(message.data);
         msgArea.append('<div><a href="' + data.sender.profile_view + '">' +
@@ -20,6 +20,7 @@
 
       function webSocketSend() {
         webSocket.send(elementMessage.val());
+        elementMessage.val('');
       }
 
       $('#btnSubmit').click( function(e) {
@@ -28,7 +29,6 @@
       elementMessage.keydown( function(e) {
         if (!e.shiftKey && e.keyCode == 13){
           webSocketSend();
-          elementMessage.val('');
           e.preventDefault();
         }
       });
