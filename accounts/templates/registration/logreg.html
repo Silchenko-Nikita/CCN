@@ -10,7 +10,7 @@
           {% csrf_token %}
           {% include 'form_fields_with_errors.html' with form=form %}
           <div class="float-right">
-            <input type="submit" class="small button" style="vertical-align: middle" name="submit" value="{% block submit_val %}{% endblock %}">
+            <input type="submit" class="button" style="vertical-align: middle" name="submit" value="{% block submit_val %}{% endblock %}">
           </div>
         </form>
 {#        {% block additions %}{% endblock %}#}

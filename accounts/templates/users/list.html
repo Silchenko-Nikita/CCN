@@ -30,7 +30,8 @@
             for (var i = 0; i < results.length; i++){
               var user = results[i];
               var userBlock = $('<div class="user-block" ></div>').append($('<a href="'+ user.profile_view +'"></a>').
-              html('<div style="height: 100px;" class="avatar"><img style="height: 100%;" src="' + user.avatar + '"></div>'));
+              html('<div style="height: 100px; display: inline-block; width: 100px; text-align: center;" class="avatar">' +
+                '<img alt="avatar" style="height: 100%;" src="' + user.avatar + '"></div>'));
               userBlock.append($('<div class="user-short-info"></div>').append($('<div class="username"></div>').html(
                 $("<a href="+ user.profile_view +"></a>").html(user.username.replace(new RegExp(q, 'ig'), '<span class="marked">$&</span>')).prop('outerHTML') +
                 " (" + (user.first_name + " " + user.last_name).replace(new RegExp(q, 'ig'), '<span class="marked">$&</span>') + ")")));
