@@ -57,10 +57,23 @@ class LiteraryComposDeleteView(LoginRequiredMixin, LiteraryComposViewMixin, Upda
         raise Http404
 
     def post(self, request, *args, **kwargs):
-        compos = self.get_object()
-        compos.status = OBJECT_STATUS_DELETED
-        compos.save()
-        return redirect(reverse('workspace-home'))
+        compos = self.get_compos(raise_404=True)
+
+        if self.kwargs.get('commit_id'):
+            commit = self.get_commit(raise_404=True)
+            commit.mark_deleted()
+
+            parent = commit.parent
+            if parent:
+                return redirect(
+                    reverse('literary-compos-commit', kwargs={'compos_id': int(self.kwargs.get('compos_id')),
+                                                              'branch_id': parent.branch.branch_id,
+                                                              'commit_id': parent.commit_id}))
+            else:
+                return redirect(reverse('literary-compos', kwargs={'compos_id': int(self.kwargs.get('compos_id'))}))
+        else:
+            compos.mark_deleted()
+            return redirect(reverse('workspace-home'))
 
 
 class LiteraryComposView(LoginRequiredMixin, LiteraryComposViewMixin, DetailView):

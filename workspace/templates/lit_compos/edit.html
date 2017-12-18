@@ -38,13 +38,13 @@
 
       {% if commit_id %}
         <div class="row" style="padding-top: 15px">
-          <div class="column small-offset-4 small-6">
+          <div class="column small-offset-3 small-6">
             {{ form.commit_message }}
           </div>
           <div class="column small-1">
-            <a href="">
-              <button class="button float-right" id="delete-btn-id">Delete</button>
-            </a>
+            <div href="#" data-open="deleteModal" class="button smtinyall alert float-right">
+              {% trans "Delete" %}
+            </div>
           </div>
           <div class="column small-1">
             <button class="button float-right" id="update-btn-id" name="update-btn" type="submit">Update</button>
@@ -64,6 +64,22 @@
         </div>
       {% endif %}
 
+    </form>
+  </div>
+
+  <div class="tiny reveal" id="deleteModal" data-reveal>
+    <p style="padding-top: 20px;">Are you sure you that you want to delete current commit (all children commits will be deleted too)?</p>
+    <button class="close-button" data-close aria-label="Clole modal" type="button">
+      <span class="true">&times;</span>
+    </button>
+
+    <form method="post" action="{% url 'literary-compos-commit-delete' compos_id branch_id commit_id %}">
+      {% csrf_token %}
+      <div class="text-center">
+        <button type="submit" class="button smtinyall alert">
+          <span>Delete</span>
+        </button>
+      </div>
     </form>
   </div>
 {% endblock %}

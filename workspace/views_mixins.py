@@ -28,7 +28,7 @@ class LiteraryComposViewMixin:
         compos = self.get_compos(raise_404=True)
         branch_id = int(self.kwargs.get('branch_id', 0))
 
-        brs = compos.branches.all()
+        brs = compos.branches.filter(status=OBJECT_STATUS_ACTIVE)
         if branch_id:
             brs = brs.filter(branch_id=branch_id)
             if raise_404 and not brs.exists():
@@ -43,7 +43,7 @@ class LiteraryComposViewMixin:
 
         commit_id = int(self.kwargs.get('commit_id', 0))
 
-        commits = ComposCommit.objects.filter(branch=br)
+        commits = ComposCommit.objects.filter(branch=br, status=OBJECT_STATUS_ACTIVE)
         if commit_id:
             commits = commits.filter(commit_id=commit_id)
             if raise_404 and not commits.exists():

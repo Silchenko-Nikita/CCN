@@ -34,6 +34,10 @@ urlpatterns = [
         LiteraryComposDeleteView.as_view(),
         name="literary-compos-delete"),
 
+    url(r'^literary-compos/(?P<compos_id>[0-9]+)/(?P<branch_id>[0-9]+)/(?P<commit_id>[0-9]+)/delete$',
+        LiteraryComposDeleteView.as_view(),
+        name="literary-compos-commit-delete"),
+
     url(r'^literary-compos/(?P<compos_id>[0-9]+)/(?P<branch_id>[0-9]+)/(?P<commit_id>[0-9]+)/update$',
         LiteraryComposTitleUpdateView.as_view(),
         name="literary-compos-update"),

@@ -10,6 +10,7 @@ from git import Actor
 from git import Repo
 
 from CCN.settings import MEDIA_ROOT, COMPOSES_DIR
+from general.consts import OBJECT_STATUS_DELETED, OBJECT_STATUS_ACTIVE
 from general.models import CreatedUpdatedModel
 from workspace.consts import CONTENT_FILE, METADATA_FILE, DEFAULT_COMMIT_MESSAGE, DEFAULT_COMPOS_TITLE
 from workspace.managers import ComposBranchManager, ComposCommitManager
@@ -20,7 +21,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 class Compos(CreatedUpdatedModel):
     title = models.CharField(max_length=512, default=_(DEFAULT_COMPOS_TITLE))
     tag = models.CharField(null=True, blank=True, max_length=512)
-    compos_id = models.IntegerField(default=0)  # relates to author
+    compos_id = models.IntegerField(default=0, null=True)  # relates to author
     author = models.ForeignKey(User, related_name='composes')
 
     def __str__(self):
@@ -39,6 +40,11 @@ class Compos(CreatedUpdatedModel):
         master_br = self.get_master_br()
         return master_br.get_tree()
 
+    def mark_deleted(self):
+        self.status = OBJECT_STATUS_DELETED
+        self.compos_id = None
+        self.save()
+
     @property
     def get_repo_name(self):
         return '{}|{}|{}'.format(self.id, self.created.isoformat(), self.author)
@@ -46,12 +52,7 @@ class Compos(CreatedUpdatedModel):
     @property
     def get_repo_path(self):
         full_path = os.path.join(MEDIA_ROOT, COMPOSES_DIR, self.get_repo_name)
-        # rel_path = os.path.realpath(full_path, BASE_DIR)
         return full_path
-
-    # @property
-    # def str(self):
-    #     return (_('Composition {}') + ' ({})').format(self.id, self.title)
 
     def repo_exists(self):
         return os.path.exists(self.get_repo_path)
@@ -60,7 +61,8 @@ class Compos(CreatedUpdatedModel):
         created = self.pk is None
 
         if created:
-            self.compos_id = (self.author.composes.aggregate(Max('compos_id'))['compos_id__max'] or 0) + 1
+            self.compos_id = (self.author.composes.filter(status=OBJECT_STATUS_ACTIVE)
+                              .aggregate(Max('compos_id'))['compos_id__max'] or 0) + 1
 
         self.title = self.title or _(DEFAULT_COMPOS_TITLE)
         compos = super().save(**kwargs)
@@ -77,12 +79,17 @@ class Compos(CreatedUpdatedModel):
 
 
 class ComposBranch(CreatedUpdatedModel):
-    branch_id = models.IntegerField(default=0)  # relates to compos
+    branch_id = models.IntegerField(default=0, null=True)  # relates to compos
     tag = models.CharField(null=True, blank=True, max_length=512)
     author = models.ForeignKey(User)
     parent_commit = models.ForeignKey('ComposCommit', related_name='child_branches', null=True, blank=True)
     compos = models.ForeignKey(Compos, related_name='branches')
     objects = ComposBranchManager()
+
+    def mark_deleted(self):
+        self.status = OBJECT_STATUS_DELETED
+        self.branch_id = None
+        self.save()
 
     def get_absolute_url(self):
         return reverse('literary-compos-branch', kwargs={'compos_id': self.compos.compos_id,
@@ -94,7 +101,7 @@ class ComposBranch(CreatedUpdatedModel):
                                                                'branch_id': self.branch_id})
 
     def get_last_commit(self):
-        return self.commits.order_by('commit_id').last()
+        return self.commits.filter(status=OBJECT_STATUS_ACTIVE).order_by('commit_id').last()
 
     # last commit
     def get_content(self):
@@ -109,7 +116,7 @@ class ComposBranch(CreatedUpdatedModel):
         return content
 
     def get_tree(self):
-        first_commit = self.commits.order_by('commit_id').first()
+        first_commit = self.commits.filter(status=OBJECT_STATUS_ACTIVE).order_by('commit_id').first()
         return first_commit.get_tree() if first_commit else None
 
     @property
@@ -125,7 +132,8 @@ class ComposBranch(CreatedUpdatedModel):
 
     def save(self, commit=False, **kwargs):
         if not self.pk:
-            self.branch_id = (self.compos.branches.aggregate(Max('branch_id'))['branch_id__max'] or 0) + 1
+            self.branch_id = (self.compos.branches.filter(status=OBJECT_STATUS_ACTIVE)
+                              .aggregate(Max('branch_id'))['branch_id__max'] or 0) + 1
 
         super().save(**kwargs)
 
@@ -139,7 +147,7 @@ class ComposBranch(CreatedUpdatedModel):
 
 
 class ComposCommit(CreatedUpdatedModel):
-    commit_id = models.IntegerField(default=0)  # relates to branch
+    commit_id = models.IntegerField(default=0, null=True)  # relates to branch
     tag = models.CharField(null=True, blank=True, max_length=512)
     title = models.CharField(max_length=512)
     commit_message = models.CharField(max_length=128, default=DEFAULT_COMMIT_MESSAGE)
@@ -147,6 +155,21 @@ class ComposCommit(CreatedUpdatedModel):
     parent = models.ForeignKey('ComposCommit', related_name='children', null=True, blank=True)
     objects = ComposCommitManager()
     content = ''
+
+    def mark_deleted(self):
+        repo = Repo(self.branch.compos.get_repo_path)
+        repo.delete_tag(self.get_commit_name)
+        del repo
+
+        if self.parent.branch_id != self.branch_id:
+            self.branch.mark_deleted()
+
+        self.status = OBJECT_STATUS_DELETED
+        self.commit_id = None
+        self.save()
+
+        for child in self.children.all():
+            child.mark_deleted()
 
     def get_absolute_url(self):
         return reverse('literary-compos-commit', kwargs={'compos_id': self.branch.compos.compos_id,
@@ -174,7 +197,7 @@ class ComposCommit(CreatedUpdatedModel):
 
     @classmethod
     def get_children_tree(cls, id):
-        children = ComposCommit.objects.filter(parent_id=id)
+        children = ComposCommit.objects.filter(parent_id=id, status=OBJECT_STATUS_ACTIVE)
         children_data = children.values('id', 'title', 'tag', 'commit_message', 'branch__compos__author_id',
                                         'branch__compos__compos_id', 'branch__branch_id', 'commit_id')
 
@@ -192,7 +215,8 @@ class ComposCommit(CreatedUpdatedModel):
         return children_res
 
     def get_tree(self):
-        self_data = ComposCommit.objects.filter(id=self.id).values('title', 'tag', 'commit_id', 'commit_message',
+        self_data = ComposCommit.objects.filter(id=self.id, status=OBJECT_STATUS_ACTIVE).values(
+                                                                   'title', 'tag', 'commit_id', 'commit_message',
                                                                    'branch__compos__author_id', 'branch__compos__compos_id',
                                                                    'branch__branch_id')[0]
         self_data['children'] = self.get_children_tree(self.id)
@@ -282,7 +306,7 @@ class ComposCommit(CreatedUpdatedModel):
     def save(self, commit=False, **kwargs):
         if not self.pk:
             if getattr(self, 'parent', None):
-                if self.parent.children.exists():
+                if self.parent.children.filter(status=OBJECT_STATUS_ACTIVE).exists():
                     br = ComposBranch.objects.create(author=getattr(self, 'author', self.parent.branch.author),
                                                      title=self.title,
                                                      compos=self.parent.branch.compos,
@@ -293,7 +317,7 @@ class ComposCommit(CreatedUpdatedModel):
                 else:
                     self.branch = self.parent.branch
 
-            last_commit = self.branch.commits.order_by('commit_id').last()
+            last_commit = self.branch.commits.filter(status=OBJECT_STATUS_ACTIVE).order_by('commit_id').last()
             self.commit_id = (last_commit.commit_id if last_commit else 0) + 1
             self.parent = self.parent or last_commit or self.branch.parent_commit
 
