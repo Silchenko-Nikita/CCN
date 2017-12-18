@@ -147,7 +147,11 @@ USE_TZ = True
 
 
 REST_FRAMEWORK = {
-    'SEARCH_PARAM': 'q'
+    'SEARCH_PARAM': 'q',
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    )
 }
 
 

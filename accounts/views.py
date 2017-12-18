@@ -79,6 +79,31 @@ class SearchView(ListView):
     queryset = User.objects.none()
 
 
+class FriendsView(ListView):
+    template_name = 'users/friends.html'
+    model = User
+    queryset = User.objects.none()
+
+
+class InviteToFriends(DetailView):
+    model = User
+
+    def get(self, request, *args, **kwargs):
+        invited_user = self.get_object()
+        request.user.profile.invited_to_friends.add(invited_user.profile)
+        return redirect(reverse_lazy('guest-profile', kwargs=self.kwargs))
+
+
+class ConfirmInvitation(DetailView):
+    model = User
+
+    def get(self, request, *args, **kwargs):
+        inviter = self.get_object()
+        inviter.profile.invited_to_friends.remove(request.user.profile)
+        inviter.profile.friends.add(request.user.profile)
+        return redirect(reverse_lazy('guest-profile', kwargs=self.kwargs))
+
+
 class EmailLoginView(LoginView):
     # extra_context = {"next": reverse_lazy("home")}
 

@@ -33,6 +33,23 @@
         </form>
       {% endif %}
 
+      {% if not is_owner %}
+        <div>
+          {% if user.profile in request.user.profile.friends.all %}
+            <p>{% trans "Is friend" %}</p>
+          {% elif user.profile in request.user.profile.invited_to_friends.all %}
+            <p>{% trans "Invited to friends" %}</p>
+          {% elif user.profile in request.user.profile.inviters.all %}
+            <a href="{% url 'confirm-invitation' user.id %}">
+              <button class="button">{% trans "Confirm invitation" %}</button>
+            </a>
+          {% else %}
+            <a href="{% url 'invite-to-friends' user.id %}">
+              <button class="button">{% trans "Invite to friends" %}</button>
+            </a>
+          {% endif %}
+        </div>
+      {% endif %}
       <div>
         <a href="{% url 'new-chat' %}?users_ids={{ user.id }}{% if not is_owner %},{{ request.user.id }}{% endif %}">
           <button class="button">{% trans "Go to chat" %}</button>

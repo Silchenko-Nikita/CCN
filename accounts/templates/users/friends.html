@@ -1,0 +1,21 @@
+{% extends "users/users_upload_base.html" %}
+
+{% block content_to_right %}
+  {% if request.user.profile.inviters.count %}
+    <p>Invitations from:
+      {% for inviter in request.user.profile.inviters.all %}
+        <a href="{{ inviter.get_absolute_url }}">{{ inviter.user.username }}</a>{% if not forloop.last %}, {% endif %}
+      {% endfor %}
+    </p>
+  {% endif %}
+  {{ block.super }}
+{% endblock %}
+
+{% block extrascripts %}
+  {{ block.super }}
+  <script>
+    jQuery(document).ready(function($) {
+      setupUsersUploading(10, '{{ request.GET.q }}', {{ request.user.profile.id }});
+    });
+  </script>
+{% endblock %}

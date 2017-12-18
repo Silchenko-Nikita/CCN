@@ -8,6 +8,8 @@
 {#      <div class="docs-nav-container sticky is-at-top is-stuck" style="max-width: 160.75px; margin-top: 5em;">#}
         <ul class="vertical menu side-nav">
           <li><a href="{% url 'profiles-search' %}">{% trans "Search for users" %}</a></li>
+          <li><a href="{% url 'profile-friends' %}">{% trans "Friends" %}
+            {% if request.user.profile.inviters.all.count %}( +{{ request.user.profile.inviters.all.count }} ){% endif %}</a></li>
           <li><a href="{% url 'workspace-home' %}">{% trans "Workspace" %}</a></li>
         </ul>
 {#      </div>#}

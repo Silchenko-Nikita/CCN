@@ -1,65 +1,10 @@
-{% extends "side_nav.html" %}
-
-{% block content_to_right %}
-  <div class="row" style="padding: 5px">
-    <div class="small-12">
-      {% include "includes/search.html" %}
-      <div id="user-list"></div>
-    </div>
-  </div>
-{% endblock %}
+{% extends "users/users_upload_base.html" %}
 
 {% block extrascripts %}
-  <script>
-    function setupUsersUploading(limit=5, q=null) {
-      var offset = 0;
-      var userList = $('#user-list');
-
-      var lim = limit;
-      var _q = q;
-      function appendUsers(limit=lim, q=_q) {
-        var total_num = 0, page_num = 0;
-        $.ajax({
-          url: "{% url 'user-list' %}?limit=" + limit + "&offset=" + offset + (q ? ('&q=' + q) : ''),
-          type: 'get',
-          async: false,
-          success: function(data) {
-            var results = data['results'];
-            total_num = data['count'];
-            page_num = results.length;
-            for (var i = 0; i < results.length; i++){
-              var user = results[i];
-              var userBlock = $('<div class="user-block" ></div>').append($('<a href="'+ user.profile_view +'"></a>').
-              html('<div style="height: 100px; display: inline-block; width: 100px; text-align: center;" class="avatar">' +
-                '<img alt="avatar" style="height: 100%;" src="' + user.avatar + '"></div>'));
-              userBlock.append($('<div class="user-short-info"></div>').append($('<div class="username"></div>').html(
-                $("<a href="+ user.profile_view +"></a>").html(user.username.replace(new RegExp(q, 'ig'), '<span class="marked">$&</span>')).prop('outerHTML') +
-                " (" + (user.first_name + " " + user.last_name).replace(new RegExp(q, 'ig'), '<span class="marked">$&</span>') + ")")));
-              userList.append(userBlock);
-            }
-            offset += results.length;
-          }
-         });
-        return { total_num: total_num, page_num: page_num }
-      }
-      var displayed_num = 0;
-      var users_num;
-      do {
-        users_num = appendUsers();
-        displayed_num += users_num.page_num;
-      } while (window.pageYOffset + window.innerHeight > userList[0].getBoundingClientRect().bottom &&
-        displayed_num < users_num.total_num);
-
-      window.onscroll = function () {
-        if(window.pageYOffset + window.innerHeight > userList[0].getBoundingClientRect().bottom) {
-          var users_num = appendUsers();
-        }
-      }
-    }
-  </script>
+  {{ block.super }}
   <script>
     jQuery(document).ready(function($) {
-      setupUsersUploading(5, '{{ request.GET.q }}');
+      setupUsersUploading(10, '{{ request.GET.q }}');
     });
   </script>
 {% endblock %}

@@ -1,0 +1,66 @@
+{% extends "side_nav.html" %}
+
+{% block content_to_right %}
+  <div class="row" id="right-content" style="padding: 5px; height: 114%; overflow-y: scroll">
+    <div class="small-12">
+      {% include "includes/search.html" %}
+      <div id="user-list"></div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block extrascripts %}
+  <script>
+    function setupUsersUploading(limit=5, q=null, profile__friends=null) {
+      let offset = 0;
+      let userList = $('#user-list');
+      let rightContent = $('#right-content');
+
+      let total_num = 0, page_num = 0;
+      let displayed_num = 0;
+      let users_num;
+
+      function appendUsers() {
+        $.ajax({
+          url: "{% url 'user-list' %}?limit=" + limit +
+          (profile__friends ? ('&profile__friends=' + profile__friends) : '') +
+          "&offset=" + offset + (q ? ('&q=' + q) : ''),
+          type: 'get',
+          async: true,
+          success: function(data) {
+            let results = data['results'];
+            console.log("{% url 'user-list' %}?limit=" + limit +
+          (profile__friends ? ('&profile__friends=' + profile__friends) : '') +
+          "&offset=" + offset + (q ? ('&q=' + q) : ''));
+            total_num = data['count'];
+            page_num = results.length;
+            for (let i = 0; i < results.length; i++){
+              let user = results[i];
+              let userBlock = $('<div class="user-block"></div>').append($('<a href="'+ user.profile_view +'"></a>').
+              html('<div style="height: 100px; display: inline-block; width: 100px; text-align: center;" class="avatar">' +
+                '<img alt="avatar" style="height: 100%;" src="' + user.avatar + '"></div>'));
+              userBlock.append($('<div class="user-short-info"></div>').append($('<div class="username"></div>').html(
+                $("<a href="+ user.profile_view +"></a>").html(user.username.replace(new RegExp(q, 'ig'), '<span class="marked">$&</span>')).prop('outerHTML') +
+                " (" + (user.first_name + " " + user.last_name).replace(new RegExp(q, 'ig'), '<span class="marked">$&</span>') + ")")));
+              userList.append(userBlock);
+            }
+            offset += results.length;
+            displayed_num += page_num
+          }
+         });
+      }
+      do {
+        appendUsers();
+      } while (rightContent[0].clientHeight + rightContent[0].scrollTop >= rightContent[0].scrollHeight &&
+        displayed_num < total_num);
+
+      rightContent[0].onscroll = function (){
+        console.log(displayed_num);
+        if(rightContent[0].clientHeight + rightContent[0].scrollTop >= rightContent[0].scrollHeight &&
+          displayed_num < total_num) {
+          appendUsers();
+        }
+      }
+    }
+  </script>
+{% endblock %}

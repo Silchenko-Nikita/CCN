@@ -19,6 +19,8 @@ class UserProfile(CreatedUpdatedModel):
     DEFAULT_AVATAR = os.path.join(AVATAR_PATH, 'default.png')
 
     user = models.OneToOneField(User, related_name='profile', unique=True)
+    friends = models.ManyToManyField('self', symmetrical=True)
+    invited_to_friends = models.ManyToManyField('self', symmetrical=False, related_name='inviters')
     birthday = models.DateField(blank=True, null=True)
     language = models.CharField(max_length=2, choices=LANGUAGES, default='ru')
     about_me = models.TextField(blank=True, null=True)
