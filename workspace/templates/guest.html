@@ -1,0 +1,19 @@
+{% extends "side_nav.html" %}
+
+{% load i18n %}
+
+{% block content_to_right %}
+  <div style="height: 114%; overflow-y: scroll">
+    <br>
+    {% for literary_compos in literary_composes %}
+      <div class="row">
+        <div class="column small-12">
+          <p><a href="{{ literary_compos.get_guest_url }}">{{ literary_compos }}</a>
+            (Created: {{ literary_compos.created }})
+          </p>
+          <hr>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endblock %}

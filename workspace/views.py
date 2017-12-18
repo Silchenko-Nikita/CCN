@@ -82,6 +82,16 @@ class LiteraryComposView(LoginRequiredMixin, LiteraryComposViewMixin, DetailView
         return context
 
 
+class WorkspaceGuest(LoginRequiredMixin, TemplateView):
+    template_name = 'guest.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['literary_composes'] = Compos.objects.filter(author_id=self.kwargs.get('author_id'),
+                                                             status=OBJECT_STATUS_ACTIVE).order_by('-id')
+        return context
+
+
 class LiteraryComposGuestView(LoginRequiredMixin, LiteraryComposViewMixin, DetailView):
     template_name = 'lit_compos/preview.html'
 
@@ -89,6 +99,7 @@ class LiteraryComposGuestView(LoginRequiredMixin, LiteraryComposViewMixin, Detai
         context = super().get_context_data(**kwargs)
         context['is_guest'] = True
         return context
+
 
 def new_literary_compos_view(request):
     compos = Compos.objects.create(title=None, author=request.user)

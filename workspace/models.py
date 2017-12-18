@@ -29,6 +29,9 @@ class Compos(CreatedUpdatedModel):
     def get_absolute_url(self):
         return reverse('literary-compos', kwargs={'compos_id': self.compos_id})
 
+    def get_guest_url(self):
+        return reverse('literary-compos-guest', kwargs={'author_id': self.author_id, 'compos_id': self.compos_id})
+
     def get_master_br(self):
         return self.branches.order_by('branch_id').first()
 
@@ -83,7 +86,12 @@ class ComposBranch(CreatedUpdatedModel):
 
     def get_absolute_url(self):
         return reverse('literary-compos-branch', kwargs={'compos_id': self.compos.compos_id,
-                                                'branch_id': self.branch_id})
+                                                         'branch_id': self.branch_id})
+
+    def get_guest_url(self):
+        return reverse('literary-compos-guest-branch', kwargs={'author_id': self.compos.author_id,
+                                                               'compos_id': self.compos.compos_id,
+                                                               'branch_id': self.branch_id})
 
     def get_last_commit(self):
         return self.commits.order_by('commit_id').last()
