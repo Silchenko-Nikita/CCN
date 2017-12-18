@@ -151,10 +151,23 @@ class ComposCommit(CreatedUpdatedModel):
                                                          'branch_id': branch_id,
                                                          'commit_id': commit_id})
 
+    def get_guest_url(self):
+        return reverse('literary-compos-guest-commit', kwargs={'author_id': self.branch.compos.author_id,
+                                                         'compos_id': self.branch.compos.compos_id,
+                                                         'branch_id': self.branch.branch_id,
+                                                         'commit_id': self.commit_id})
+
+    @classmethod
+    def cls_get_guest_url(cls, author_id, compos_id, branch_id, commit_id):
+        return reverse('literary-compos-guest-commit', kwargs={'author_id': author_id,
+                                                         'compos_id': compos_id,
+                                                         'branch_id': branch_id,
+                                                         'commit_id': commit_id})
+
     @classmethod
     def get_children_tree(cls, id):
         children = ComposCommit.objects.filter(parent_id=id)
-        children_data = children.values('id', 'title', 'tag', 'commit_message',
+        children_data = children.values('id', 'title', 'tag', 'commit_message', 'branch__compos__author_id',
                                         'branch__compos__compos_id', 'branch__branch_id', 'commit_id')
 
         children_res = []
@@ -163,21 +176,27 @@ class ComposCommit(CreatedUpdatedModel):
             data['children'] = tree
             data['compos_id'] = data.pop('branch__compos__compos_id')
             data['branch_id'] = data.pop('branch__branch_id')
+            data['author_id'] = data.pop('branch__compos__author_id')
             data['absolute_url'] = cls.cls_get_absolute_url(data['compos_id'], data['branch_id'], data['commit_id'])
+            data['guest_url'] = cls.cls_get_guest_url(data['author_id'], data['compos_id'], data['branch_id'], data['commit_id'])
             children_res.append(data)
 
         return children_res
 
     def get_tree(self):
         self_data = ComposCommit.objects.filter(id=self.id).values('title', 'tag', 'commit_id', 'commit_message',
-                                                                   'branch__compos__compos_id', 'branch__branch_id')[0]
+                                                                   'branch__compos__author_id', 'branch__compos__compos_id',
+                                                                   'branch__branch_id')[0]
         self_data['children'] = self.get_children_tree(self.id)
         compos_id = self_data.pop('branch__compos__compos_id')
         branch_id = self_data.pop('branch__branch_id')
+        author_id = self_data.pop('branch__compos__author_id')
 
         self_data['compos_id'] = compos_id
         self_data['branch_id'] = branch_id
+        self_data['author_id'] = author_id
         self_data['absolute_url'] = self.get_absolute_url()
+        self_data['guest_url'] = self.get_guest_url()
         return self_data
 
     def get_content(self):

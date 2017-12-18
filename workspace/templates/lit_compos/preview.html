@@ -1,0 +1,32 @@
+{% extends 'compos_base.html' %}
+
+{% load i18n static %}
+
+{% block content_to_right %}
+  <div style="height: 114%; overflow-y: scroll">
+    <div class="row">
+      <div style="width: 100%; overflow-x: auto; padding-top: 5px" class="column small-12">
+        <canvas id="gitGraph" hidden></canvas>
+      </div>
+    </div>
+
+    <div class="row">
+      <div style="text-align: center;">
+        {% if compos_title_form %}
+          <div class="column small-12">
+            {{ compos_title_form.instance.title }}
+          </div>
+        {% endif %}
+        <div class="column small-12" style="padding-bottom: 10px;">
+          ({{ form.instance.title }})
+        </div>
+        <hr>
+      </div>
+      <div class="column small-12">
+        <div style="height: 300px; width: 100%">
+          {{ form.fields.content.initial|safe }}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

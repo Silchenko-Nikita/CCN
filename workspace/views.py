@@ -65,55 +65,6 @@ class LiteraryComposDeleteView(LoginRequiredMixin, LiteraryComposViewMixin, Upda
 
 class LiteraryComposView(LoginRequiredMixin, LiteraryComposViewMixin, DetailView):
     template_name = 'lit_compos/edit.html'
-    model = Compos
-    context_object_name = 'compos'
-
-    def get_branch(self, raise_404=True):
-        compos = self.get_compos(raise_404=True)
-        branch_id = int(self.kwargs.get('branch_id', 0))
-
-        brs = compos.branches.all()
-        if branch_id:
-            brs = brs.filter(branch_id=branch_id)
-            if raise_404 and not brs.exists():
-                raise Http404
-
-        br = brs.order_by('branch_id').first()
-
-        return br
-
-    def get_commit(self, raise_404=True):
-        br = self.get_branch(raise_404=True)
-
-        commit_id = int(self.kwargs.get('commit_id', 0))
-
-        commits = ComposCommit.objects.filter(branch=br)
-        if commit_id:
-            commits = commits.filter(commit_id=commit_id)
-            if raise_404 and not commits.exists():
-                raise Http404
-
-        commit = commits.order_by('commit_id').last()
-
-        return commit
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        compos = self.get_compos(raise_404=True)
-        commit = self.get_commit(raise_404=True)
-
-        if compos:
-            context['compos_title_form'] = LiteraryComposTitleForm(instance=compos)
-            context['compos_id'] = int(compos.compos_id)
-
-        context['form'] = LiteraryComposForm(instance=commit)
-        context['tree'] = mark_safe(json.dumps(compos.get_tree()))
-
-        context['branch_id'] = int(commit.branch.branch_id if commit else self.get_branch(raise_404=True).branch_id)
-        context['commit_id'] = int(commit.commit_id if commit else 0)
-
-        context['commit'] = commit
-        return context
 
     def post(self, request, *args, **kwargs):
         update_commit = request.GET.get('update_commit')
@@ -125,6 +76,19 @@ class LiteraryComposView(LoginRequiredMixin, LiteraryComposViewMixin, DetailView
                 form.commit(branch=self.get_branch())
         return redirect(commit.get_absolute_url())
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['is_guest'] = False
+        return context
+
+
+class LiteraryComposGuestView(LoginRequiredMixin, LiteraryComposViewMixin, DetailView):
+    template_name = 'lit_compos/preview.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['is_guest'] = True
+        return context
 
 def new_literary_compos_view(request):
     compos = Compos.objects.create(title=None, author=request.user)

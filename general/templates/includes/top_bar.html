@@ -14,8 +14,8 @@
   <div class="top-bar-right">
     <ul class="menu">
       {% if request.user.is_authenticated %}
-        <li><input type="search" placeholder="Search"></li>
-        <li><button class="button">Search</button></li>
+{#        <li><input type="search" placeholder="Search"></li>#}
+{#        <li><button class="button">Search</button></li>#}
         <li><a href="{% url 'logout' %}">Log out</a></li>
       {% else %}
         <li><a href="{% url 'login' %}">Log in</a></li>

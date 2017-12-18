@@ -1,0 +1,101 @@
+{% extends 'side_nav.html' %}
+
+{% load static %}
+
+{% block extrascripts %}
+  <script src="{% static 'third_party/gitgraph/gitgraph.min.js' %}"></script>
+  <script>
+    $(document).ready(function(){
+      let myTemplateConfig = {
+        commit: {
+          shouldDisplayTooltipsInCompactMode: true,
+          tooltipHTMLFormatter: function ( commit ) {
+            return commit.message;
+          }
+        }
+      };
+      let root = location.protocol + '//' + location.host;
+
+      let myTemplate = new GitGraph.Template( myTemplateConfig );
+
+      let gitgraph = new GitGraph({
+        template: myTemplate,
+        orientation: 'horizontal-reverse',
+      });
+
+      gitgraph.canvas.addEventListener( "commit:mouseover", function ( event ) {
+        this.style.cursor = "pointer";
+      } );
+
+      gitgraph.canvas.addEventListener("commit:mouseout", function (event) {
+        this.style.cursor = "auto";
+      });
+
+      let tree = {{ tree }};
+
+      if (tree) {
+        document.getElementById('gitGraph').removeAttribute('hidden');
+      }
+
+      let branchesDict = {};
+
+      function displayTree(commit_el, parent_branch_id) {
+        if (!commit_el) return;
+
+        let branch_id = commit_el['branch_id'];
+        let commit_id = commit_el['commit_id'];
+
+        if (parent_branch_id){
+          branchesDict[parent_branch_id].checkout();
+        }
+
+        if (!branchesDict[branch_id]){
+          branchesDict[branch_id] = gitgraph.branch(branch_id);
+        } else {
+          branchesDict[branch_id].checkout();
+        }
+
+        let commitConfig = {
+            message: commit_el['title'] + ' (branch ' + branch_id + ', commit ' + commit_id + ', msg: ' + commit_el['commit_message'] + ')',
+            onClick: function(commit) {
+              window.location = root + {% if is_guest %}commit_el['guest_url']{% else %}commit_el['absolute_url']{% endif %};
+            },
+          };
+
+        if (branch_id == {{ branch_id }} && commit_id == {{ commit_id }}) {
+          commitConfig['dotColor'] = "white";
+          commitConfig['dotSize'] = 2;
+          commitConfig['dotStrokeWidth'] = 2;
+        }
+
+        gitgraph.commit(commitConfig);
+
+        let children = commit_el['children'];
+        children.sort((a, b) => a['branch_id'] < b['branch_id']);
+        console.dir(children);
+
+        for (child of children){
+          displayTree(child, branch_id);
+        }
+      }
+
+      displayTree(tree);
+
+      ///
+
+      function onUpdate(event) {
+       event.preventDefault();
+       let form = document.getElementById("commit-form-id");
+       form.setAttribute('action', '?update_commit=true');
+       form.submit();
+      }
+
+      let updateBtn = document.getElementById("update-btn-id");
+      updateBtn.addEventListener("click", onUpdate);
+    });
+  </script>
+{% endblock %}
+
+{% block extrastyles %}
+  <link rel="stylesheet" type="text/css" href="{% static 'third_party/gitgraph/gitgraph.css' %}" />
+{% endblock %}
