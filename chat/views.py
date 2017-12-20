@@ -45,7 +45,10 @@ class ChatRooms(LoginRequiredMixin, ChatUnreadChatCountMixin, ListView):
 def query_chat_view(request):
     users_ids = request.GET.get('users_ids')
     users = [int(id) for id in users_ids.split(',')] if users_ids else []
-    chats = Chat.objects.filter(users__in=users).annotate(num=Count('users')).filter(num=len(users))
+    chats = Chat.objects.annotate(num=Count('users')).filter(num=len(users))
+
+    for user_id in users:
+        chats = chats.filter(users=user_id)
 
     if chats.exists():
         chat = chats.first()

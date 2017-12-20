@@ -13,5 +13,5 @@ class ChatMessagesListView(ListAPIView):
     serializer_class = ChatMessageSerializer
     queryset = ChatMessage.objects.filter(status=OBJECT_STATUS_ACTIVE).order_by('-id')
     pagination_class = LimitOffsetPagination
-    filter_backend = (DjangoFilterBackend,)
+    filter_backends = (DjangoFilterBackend,)
     filter_fields = ('chat',)

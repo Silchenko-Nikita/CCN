@@ -152,7 +152,7 @@ class ComposBranch(CreatedUpdatedModel):
 
     @property
     def get_branch_name(self):
-        return 'branch_%d' % self.branch_id
+        return 'branch_{}'.format(self.branch_id)
 
     def _commit(self):
         return ComposCommit.objects.create(title=getattr(self, 'title', ''),
@@ -174,7 +174,7 @@ class ComposBranch(CreatedUpdatedModel):
         return self
 
     class Meta:
-        unique_together = (('branch_id', 'compos'), ('tag', 'compos'))
+        unique_together = (('id', 'compos'), ('tag', 'compos'))
 
 
 class ComposCommit(CreatedUpdatedModel):
@@ -188,8 +188,7 @@ class ComposCommit(CreatedUpdatedModel):
     content = ''
 
     def copy(self, new_branch, new_parent):
-        children = list(self.children.filter(status=OBJECT_STATUS_ACTIVE))
-
+        children = list(self.children.filter().order_by('status', 'branch__branch_id'))
         self.pk = None
         self.branch = new_branch
         self.parent = new_parent
@@ -200,17 +199,20 @@ class ComposCommit(CreatedUpdatedModel):
 
     def mark_deleted(self):
         repo = Repo(self.branch.compos.get_repo_path)
-        repo.delete_tag(self.get_commit_name)
+        try:
+            repo.delete_tag(self.get_commit_name)
+        except:
+            pass
         del repo
 
-        if self.parent.branch_id != self.branch_id:
+        if self.parent and self.parent.branch_id != self.branch_id:
             self.branch.mark_deleted()
 
         self.status = OBJECT_STATUS_DELETED
         self.commit_id = None
         self.save()
 
-        for child in self.children.all():
+        for child in self.children.filter(status=OBJECT_STATUS_ACTIVE):
             child.mark_deleted()
 
     def get_absolute_url(self):
@@ -226,16 +228,16 @@ class ComposCommit(CreatedUpdatedModel):
 
     def get_guest_url(self):
         return reverse('literary-compos-guest-commit', kwargs={'author_id': self.branch.compos.author_id,
-                                                         'compos_id': self.branch.compos.compos_id,
-                                                         'branch_id': self.branch.branch_id,
-                                                         'commit_id': self.commit_id})
+                                                               'compos_id': self.branch.compos.compos_id,
+                                                               'branch_id': self.branch.branch_id,
+                                                               'commit_id': self.commit_id})
 
     @classmethod
     def cls_get_guest_url(cls, author_id, compos_id, branch_id, commit_id):
         return reverse('literary-compos-guest-commit', kwargs={'author_id': author_id,
-                                                         'compos_id': compos_id,
-                                                         'branch_id': branch_id,
-                                                         'commit_id': commit_id})
+                                                               'compos_id': compos_id,
+                                                               'branch_id': branch_id,
+                                                               'commit_id': commit_id})
 
     @classmethod
     def get_children_tree(cls, id):
@@ -251,16 +253,17 @@ class ComposCommit(CreatedUpdatedModel):
             data['branch_id'] = data.pop('branch__branch_id')
             data['author_id'] = data.pop('branch__compos__author_id')
             data['absolute_url'] = cls.cls_get_absolute_url(data['compos_id'], data['branch_id'], data['commit_id'])
-            data['guest_url'] = cls.cls_get_guest_url(data['author_id'], data['compos_id'], data['branch_id'], data['commit_id'])
+            data['guest_url'] = cls.cls_get_guest_url(data['author_id'], data['compos_id'], data['branch_id'],
+                                                      data['commit_id'])
             children_res.append(data)
 
         return children_res
 
     def get_tree(self):
         self_data = ComposCommit.objects.filter(id=self.id, status=OBJECT_STATUS_ACTIVE).values(
-                                                                   'title', 'tag', 'commit_id', 'commit_message',
-                                                                   'branch__compos__author_id', 'branch__compos__compos_id',
-                                                                   'branch__branch_id')[0]
+            'title', 'tag', 'commit_id', 'commit_message',
+            'branch__compos__author_id', 'branch__compos__compos_id',
+            'branch__branch_id')[0]
         self_data['children'] = self.get_children_tree(self.id)
         compos_id = self_data.pop('branch__compos__compos_id')
         branch_id = self_data.pop('branch__branch_id')
@@ -336,7 +339,7 @@ class ComposCommit(CreatedUpdatedModel):
             repo.delete_tag(self.get_commit_name)
             repo.git.commit("-m", "'{}'".format(self.commit_message),
                             "--author='{} <{}>'".format(
-                            br.author.get_full_name(), br.author.email), '--amend')
+                                br.author.get_full_name(), br.author.email), '--amend')
         else:
             author = Actor(br.author.get_full_name(), br.author.email)
             repo.index.commit(self.commit_message, author=author)
@@ -345,10 +348,12 @@ class ComposCommit(CreatedUpdatedModel):
 
         del repo
 
-    def save(self, commit=False, **kwargs):
+    def save(self, coping=False, commit=False, **kwargs):
         if not self.pk:
             if getattr(self, 'parent', None):
-                if self.parent.children.filter(status=OBJECT_STATUS_ACTIVE).exists():
+                if (not coping and self.parent.children.filter(branch__branch_id=self.parent.branch.branch_id,
+                                                               status=OBJECT_STATUS_ACTIVE).exists()) or \
+                        (coping and self.parent.children.exists()):
                     br = ComposBranch.objects.create(author=getattr(self, 'author', self.parent.branch.author),
                                                      title=self.title,
                                                      compos=self.parent.branch.compos,
@@ -373,4 +378,4 @@ class ComposCommit(CreatedUpdatedModel):
         return super().save(**kwargs)
 
     class Meta:
-        unique_together = (('commit_id', 'branch'), ('tag', 'branch'))
+        unique_together = (('id', 'branch'), ('tag', 'branch'))

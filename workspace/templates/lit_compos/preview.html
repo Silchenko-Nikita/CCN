@@ -17,14 +17,16 @@
             {{ compos_title_form.instance.title }}
           </div>
         {% endif %}
-        <div class="column small-12" style="padding-bottom: 10px;">
-          ({{ form.instance.title }})
-        </div>
+        {% if form.instance.title %}
+          <div class="column small-12" style="padding-bottom: 10px;">
+            ({{ form.instance.title }})
+          </div>
+        {% endif %}
         <hr>
       </div>
       <div class="column small-12">
         <div style="height: 300px; width: 100%">
-          {{ form.fields.content.initial|safe }}
+          {% if form.fields.content.initial %}{{ form.fields.content.initial|safe }}{% else %}{% endif %}
         </div>
       </div>
     </div>

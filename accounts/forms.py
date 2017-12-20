@@ -64,3 +64,8 @@ class UserProfileInfoForm(forms.ModelForm):
 
 class AvatarForm(forms.Form):
     avatar = ImageField(label=_('Avatar'))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['avatar'].widget.attrs.update({'accept': _('image/*')})
