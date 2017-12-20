@@ -9,10 +9,7 @@ from workspace.forms import LiteraryComposTitleForm
 from workspace.models import Compos, ComposCommit
 
 
-class LiteraryComposViewMixin:
-    model = Compos
-    context_object_name = 'compos'
-
+class GetComposMixin:
     def get_compos(self, raise_404=True):
         author_id = int(self.kwargs.get('author_id', 0))
         compos_id = int(self.kwargs.get('compos_id', 0))
@@ -23,6 +20,11 @@ class LiteraryComposViewMixin:
             raise Http404
 
         return compos
+
+
+class LiteraryComposViewMixin(GetComposMixin):
+    model = Compos
+    context_object_name = 'compos'
 
     def get_branch(self, raise_404=True):
         compos = self.get_compos(raise_404=True)

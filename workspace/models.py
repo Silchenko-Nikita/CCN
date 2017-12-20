@@ -1,4 +1,5 @@
 import json
+from distutils.dir_util import copy_tree
 
 import os
 from django.contrib.auth.models import User
@@ -24,6 +25,7 @@ class Compos(CreatedUpdatedModel):
     compos_id = models.IntegerField(default=0, null=True)  # relates to author
     author = models.ForeignKey(User, related_name='composes')
     is_public = models.BooleanField(default=False)
+    origin = models.ForeignKey('self', related_name='copied_composes', null=True, default=None)
 
     def __str__(self):
         return (_('Composition {}') + ' ({})').format(self.compos_id, self.title)
@@ -58,17 +60,31 @@ class Compos(CreatedUpdatedModel):
     def repo_exists(self):
         return os.path.exists(self.get_repo_path)
 
-    def save(self, **kwargs):
+    def copy(self, new_author):
+        origin_repo_path = self.get_repo_path
+        master_br = self.get_master_br()
+
+        self.origin_id = self.id
+        self.pk = None
+        self.author = new_author
+        self.is_public = False
+        self.save(coping=True)
+
+        master_br.copy(self, new_author)
+
+        new_repo_path = self.get_repo_path
+        copy_tree(origin_repo_path, new_repo_path)
+
+    def save(self, coping=False, **kwargs):
         created = self.pk is None
 
         if created:
-            self.compos_id = (self.author.composes.filter(status=OBJECT_STATUS_ACTIVE)
-                              .aggregate(Max('compos_id'))['compos_id__max'] or 0) + 1
+            self.compos_id = (self.author.composes.all().aggregate(Max('compos_id'))['compos_id__max'] or 0) + 1
 
         self.title = self.title or _(DEFAULT_COMPOS_TITLE)
         compos = super().save(**kwargs)
 
-        if created:
+        if created and not coping:
             br = ComposBranch.objects.create(author=self.author,
                                              title=self.title,
                                              compos=self,
@@ -101,8 +117,22 @@ class ComposBranch(CreatedUpdatedModel):
                                                                'compos_id': self.compos.compos_id,
                                                                'branch_id': self.branch_id})
 
+    def copy(self, new_compos, new_author):
+        first_commit = self.get_first_commit()
+
+        self.pk = None
+        self.compos = new_compos
+        self.author = new_author
+        self.save()
+
+        if first_commit:
+            first_commit.copy(self, None)
+
     def get_last_commit(self):
         return self.commits.filter(status=OBJECT_STATUS_ACTIVE).order_by('commit_id').last()
+
+    def get_first_commit(self):
+        return self.commits.filter(status=OBJECT_STATUS_ACTIVE).order_by('commit_id').first()
 
     # last commit
     def get_content(self):
@@ -117,7 +147,7 @@ class ComposBranch(CreatedUpdatedModel):
         return content
 
     def get_tree(self):
-        first_commit = self.commits.filter(status=OBJECT_STATUS_ACTIVE).order_by('commit_id').first()
+        first_commit = self.get_first_commit()
         return first_commit.get_tree() if first_commit else None
 
     @property
@@ -156,6 +186,17 @@ class ComposCommit(CreatedUpdatedModel):
     parent = models.ForeignKey('ComposCommit', related_name='children', null=True, blank=True)
     objects = ComposCommitManager()
     content = ''
+
+    def copy(self, new_branch, new_parent):
+        children = list(self.children.filter(status=OBJECT_STATUS_ACTIVE))
+
+        self.pk = None
+        self.branch = new_branch
+        self.parent = new_parent
+        self.save()
+
+        for commit in children:
+            commit.copy(None, self)
 
     def mark_deleted(self):
         repo = Repo(self.branch.compos.get_repo_path)

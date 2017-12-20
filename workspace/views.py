@@ -15,7 +15,7 @@ from chat.views_mixins import ChatUnreadChatCountMixin
 from general.consts import OBJECT_STATUS_ACTIVE, OBJECT_STATUS_DELETED
 from workspace.forms import LiteraryComposForm, LiteraryComposTitleForm
 from workspace.models import Compos, ComposCommit, ComposBranch
-from workspace.views_mixins import LiteraryComposViewMixin
+from workspace.views_mixins import LiteraryComposViewMixin, GetComposMixin
 
 
 class WorkspaceHome(LoginRequiredMixin, ChatUnreadChatCountMixin, TemplateView):
@@ -92,17 +92,15 @@ class LiteraryComposView(LoginRequiredMixin, ChatUnreadChatCountMixin, LiteraryC
         return context
 
 
-class PublishLiteraryComposView(LoginRequiredMixin, ChatUnreadChatCountMixin, View):
+class LiteraryComposCopyView(LoginRequiredMixin, ChatUnreadChatCountMixin, GetComposMixin, View):
 
-    def get_compos(self, raise_404=True):
-        compos_id = int(self.kwargs.get('compos_id', 0))
-        compos = Compos.objects.filter(author=self.request.user, compos_id=compos_id,
-                                       status=OBJECT_STATUS_ACTIVE).first()
+    def get(self, request, *args, **kwargs):
+        compos = self.get_compos()
+        compos.copy(self.request.user)
+        return redirect(reverse('workspace-home'))
 
-        if raise_404 and not compos:
-            raise Http404
 
-        return compos
+class PublishLiteraryComposView(LoginRequiredMixin, ChatUnreadChatCountMixin, GetComposMixin, View):
 
     def get(self, request, *args, **kwargs):
         compos = self.get_compos()
@@ -111,17 +109,7 @@ class PublishLiteraryComposView(LoginRequiredMixin, ChatUnreadChatCountMixin, Vi
         return redirect(reverse('workspace-home'))
 
 
-class UnpublishLiteraryComposView(LoginRequiredMixin, ChatUnreadChatCountMixin, View):
-
-    def get_compos(self, raise_404=True):
-        compos_id = int(self.kwargs.get('compos_id', 0))
-        compos = Compos.objects.filter(author=self.request.user, compos_id=compos_id,
-                                       status=OBJECT_STATUS_ACTIVE).first()
-
-        if raise_404 and not compos:
-            raise Http404
-
-        return compos
+class UnpublishLiteraryComposView(LoginRequiredMixin, ChatUnreadChatCountMixin, GetComposMixin, View):
 
     def get(self, request, *args, **kwargs):
         compos = self.get_compos()

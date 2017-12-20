@@ -1,7 +1,7 @@
 from django.conf.urls import url
 from workspace.views import LiteraryComposView, WorkspaceHome, new_literary_compos_view, LiteraryComposTitleUpdateView, \
     LiteraryComposDeleteView, LiteraryComposGuestView, WorkspaceGuest, UnpublishLiteraryComposView, \
-    PublishLiteraryComposView
+    PublishLiteraryComposView, LiteraryComposCopyView
 
 urlpatterns = [
     url(r'^$', WorkspaceHome.as_view(), name="workspace-home"),
@@ -14,6 +14,14 @@ urlpatterns = [
     url(r'^literary-compos/(?P<compos_id>[0-9]+)/publish$',
         PublishLiteraryComposView.as_view(),
         name="literary-compos-publish"),
+
+    url(r'^literary-compos/(?P<compos_id>[0-9]+)/copy$',
+        LiteraryComposCopyView.as_view(),
+        name="literary-compos-copy-owner"),
+
+    url(r'^literary-compos/(?P<author_id>[0-9]+)/(?P<compos_id>[0-9]+)/copy$',
+        LiteraryComposCopyView.as_view(),
+        name="literary-compos-copy-guest"),
 
     url(r'^literary-compos/(?P<compos_id>[0-9]+)/unpublish$',
         UnpublishLiteraryComposView.as_view(),

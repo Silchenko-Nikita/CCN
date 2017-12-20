@@ -5,12 +5,13 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>{% block title %}{% endblock %}</title>
+  <title>{% block title %}CCN{% endblock %}</title>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
   <link type="text/css" rel="stylesheet"  href="{% static 'third_party/foundation/css/foundation.css' %}">
   <link type="text/css" rel="stylesheet"  href="{% static 'third_party/foundation/css/app.css' %}">
   <link type="text/css" rel="stylesheet" href="{% static 'main.css' %}">
+  <link rel="shortcut icon" href="{% static 'favicon.jpg' %}">
 
   {% block extrahead %}{% endblock %}
   {% block extrastyles %}{% endblock %}

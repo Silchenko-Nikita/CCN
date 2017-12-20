@@ -11,6 +11,11 @@
           <p><a href="{{ literary_compos.get_absolute_url }}">{{ literary_compos }}</a>
             (Created: {{ literary_compos.created }})
             <span class="float-right">
+              <a href="{% url 'literary-compos-copy-owner' literary_compos.compos_id %}">
+                <button class="button smtinyall">
+                  {% trans "Copy" %}
+                </button>
+              </a>
               {% if literary_compos.is_public %}
                 <a href="{% url 'literary-compos-unpublish' literary_compos.compos_id %}">
                   <button class="button smtinyall">
