@@ -11,14 +11,13 @@
 
 {% block extrascripts %}
   <script>
-    function setupUsersUploading(limit=5, q=null, profile__friends=null) {
+    function setupUsersUploading(limit=10, q=null, profile__friends=null) {
       let offset = 0;
       let userList = $('#user-list');
       let rightContent = $('#right-content');
 
       let total_num = 0, page_num = 0;
       let displayed_num = 0;
-      let users_num;
 
       function appendUsers() {
         $.ajax({
@@ -29,9 +28,6 @@
           async: true,
           success: function(data) {
             let results = data['results'];
-            console.log("{% url 'user-list' %}?limit=" + limit +
-          (profile__friends ? ('&profile__friends=' + profile__friends) : '') +
-          "&offset=" + offset + (q ? ('&q=' + q) : ''));
             total_num = data['count'];
             page_num = results.length;
             for (let i = 0; i < results.length; i++){
@@ -55,7 +51,6 @@
         displayed_num < total_num);
 
       rightContent[0].onscroll = function (){
-        console.log(displayed_num);
         if(rightContent[0].clientHeight + rightContent[0].scrollTop >= rightContent[0].scrollHeight &&
           displayed_num < total_num) {
           appendUsers();

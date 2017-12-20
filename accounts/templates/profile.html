@@ -55,13 +55,11 @@
           <button class="button">{% trans "Go to chat" %}</button>
         </a>
       </div>
-      {% if not is_owner %}
-        <div>
-          <a href="{% url 'workspace-guest' user.id %}">
-            <button class="button">{% trans "View public compositions" %}</button>
-          </a>
-        </div>
-      {% endif %}
+      <div>
+        <a href="{% url 'workspace-guest' user.id %}">
+          <button class="button">{% trans "View published compositions" %}</button>
+        </a>
+      </div>
     </div>
     <div class="columns small-5 large-6">
       <p>

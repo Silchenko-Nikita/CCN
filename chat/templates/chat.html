@@ -4,10 +4,64 @@
 
 {% block extrascripts %}
   {% include 'reload_on_refresh.html' %}
+
+  <script>
+    function setupChatMessagesUploading(limit=10) {
+      let offset = 0;
+      let msgArea = $('#msgArea');
+      let msgScroll = $('#msgScroll');
+
+      let total_num = 0, page_num = 0;
+      let displayed_num = 0;
+
+      function appendChatMessages(scrollDown=false) {
+        $.ajax({
+          url: "{% url 'chat-messages' %}?limit=" + limit + "&offset=" + offset + "&chat=" + {{ chat.id }},
+          type: 'get',
+          async: true,
+          success: function(data) {
+            let results = data['results'];
+            total_num = data['count'];
+            page_num = results.length;
+            for (let i = 0; i < results.length; i++){
+              let message = results[i];
+              msgArea.prepend('<div style="padding-left: 20px; padding-right: 20px;"><a href="' + message.author_profile_view + '">' +
+              '<strong>'+ message.author_name + '</strong></a>: <br>' +
+              '<div style="word-wrap: break-word; white-space: pre-wrap;">'
+              + message.text + '</div></div><hr>');
+            }
+            offset += results.length;
+            displayed_num += page_num;
+            if (scrollDown) {
+              msgScroll.scrollTop(1000000);
+            }
+
+            setTimeout(function () {
+              if (msgScroll[0].scrollTop <= 0 && displayed_num < total_num) {
+                appendChatMessages(false);
+              }
+            }, 300)
+          }
+         });
+      }
+      do {
+        appendChatMessages(true);
+      } while (msgScroll[0].scrollTop <= 0 && displayed_num < total_num);
+
+      msgScroll[0].onscroll = function (){
+        if(msgScroll[0].scrollTop <= 0 && displayed_num < total_num) {
+          appendChatMessages(false);
+        }
+      }
+    }
+  </script>
+
   <script>
     $(document).ready(function(){
+      let msgScroll = $('#msgScroll');
       let msgArea = $('#msgArea');
       let elementMessage = $('#message');
+
       let webSocket = new WebSocket('wss://' + window.location.host + '/chat/' + {{ chat.id }} + '/');
       webSocket.onmessage = function(message) {
         let data = JSON.parse(message.data);
@@ -15,11 +69,12 @@
           '<strong>'+ data.sender.username + '</strong></a>: <br>' +
           '<div style="word-wrap: break-word; white-space: pre-wrap;">'
           + data.message + '</div></div><hr>');
-        msgArea.scrollTop(1000000);
 
         webSocket.send(JSON.stringify({
           'type': 'got_message',
         }));
+
+        msgScroll.scrollTop(1000000);
       };
 
       function webSocketSend() {
@@ -36,10 +91,12 @@
       elementMessage.keydown( function(e) {
         if (!e.shiftKey && e.keyCode == 13){
           e.preventDefault();
-          webSocketSend();
+          if (elementMessage.val()){
+            webSocketSend();
+          }
         }
       });
-      msgArea.scrollTop(1000000);
+      setupChatMessagesUploading(10);
     });
   </script>
 {% endblock %}
@@ -48,14 +105,9 @@
   <div class="row" style="height: 100%;">
     <div class="small-12 small-centered" style="height: 106%;">
       <div style="height: 100%;">
-        <div id="msgArea" style="height: 75%; overflow-y: scroll">
+        <div id="msgScroll" style="height: 75%; overflow-y: scroll">
           <br>
-          {% for message in messages.all %}
-            <div style="padding-left: 20px; padding-right: 20px;"><a href="{{ message.author.profile.get_absolute_url }}"><strong>{{ message.author }}</strong></a>: <br>
-              <div style="word-wrap: break-word; white-space: pre-wrap;">{{ message.text }}</div>
-            </div>
-            <hr>
-          {% endfor %}
+          <div id="msgArea"></div>
         </div>
 
         <div style="height: 15%;">

@@ -11,7 +11,7 @@ from general.consts import OBJECT_STATUS_ACTIVE
 
 class UserViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, )
-    queryset = User.objects.filter(is_superuser=False, is_active=OBJECT_STATUS_ACTIVE)
+    queryset = User.objects.filter(is_superuser=False)
     serializer_class = HyperlinkedUserSerializer
     pagination_class = LimitOffsetPagination
     filter_backends = (filters.SearchFilter, DjangoFilterBackend)

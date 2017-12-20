@@ -12,6 +12,7 @@
           <li><a href="{% url 'chatrooms' %}">{% trans "Chats" %}
             {% if unread_chats_num %}( +{{ unread_chats_num }} ){% endif %}</a></li>
           <li><a href="{% url 'workspace-home' %}">{% trans "Workspace" %}</a></li>
+          <li><a href="{% url 'workspace-guest' user.id %}">{% trans "Published compositions" %}</a></li>
         </ul>
     </div>
     <div class="columns small-8 large-10" style="height:100%;">
