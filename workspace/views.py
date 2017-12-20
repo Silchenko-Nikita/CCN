@@ -6,6 +6,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.safestring import mark_safe
+from django.views import View
 from django.views.generic import DetailView
 from django.views.generic import TemplateView
 from django.views.generic import UpdateView
@@ -40,13 +41,11 @@ class LiteraryComposTitleUpdateView(LoginRequiredMixin, ChatUnreadChatCountMixin
         if form.is_valid():
             form.save()
 
-        commit_id = int(self.kwargs.get('commit_id'))
-        if commit_id:
-            return redirect(reverse('literary-compos-commit', kwargs={'compos_id': int(self.kwargs.get('compos_id')),
-                                                          'branch_id': int(self.kwargs.get('branch_id')),
-                                                          'commit_id': commit_id}))
+        commit = self.get_compos(raise_404=False)
+        if commit:
+            return redirect(commit.get_absolute_url())
         else:
-            return redirect(reverse('literary-compos', kwargs={'compos_id': int(self.kwargs.get('compos_id'))}))
+            return redirect(compos.get_absolute_url())
 
 
 class LiteraryComposDeleteView(LoginRequiredMixin, ChatUnreadChatCountMixin, LiteraryComposViewMixin, UpdateView):
@@ -66,12 +65,9 @@ class LiteraryComposDeleteView(LoginRequiredMixin, ChatUnreadChatCountMixin, Lit
 
             parent = commit.parent
             if parent:
-                return redirect(
-                    reverse('literary-compos-commit', kwargs={'compos_id': int(self.kwargs.get('compos_id')),
-                                                              'branch_id': parent.branch.branch_id,
-                                                              'commit_id': parent.commit_id}))
+                return redirect(parent.get_absolute_url())
             else:
-                return redirect(reverse('literary-compos', kwargs={'compos_id': int(self.kwargs.get('compos_id'))}))
+                return redirect(compos.get_absolute_url())
         else:
             compos.mark_deleted()
             return redirect(reverse('workspace-home'))
@@ -96,12 +92,51 @@ class LiteraryComposView(LoginRequiredMixin, ChatUnreadChatCountMixin, LiteraryC
         return context
 
 
+class PublishLiteraryComposView(LoginRequiredMixin, ChatUnreadChatCountMixin, View):
+
+    def get_compos(self, raise_404=True):
+        compos_id = int(self.kwargs.get('compos_id', 0))
+        compos = Compos.objects.filter(author=self.request.user, compos_id=compos_id,
+                                       status=OBJECT_STATUS_ACTIVE).first()
+
+        if raise_404 and not compos:
+            raise Http404
+
+        return compos
+
+    def get(self, request, *args, **kwargs):
+        compos = self.get_compos()
+        compos.is_public = True
+        compos.save()
+        return redirect(reverse('workspace-home'))
+
+
+class UnpublishLiteraryComposView(LoginRequiredMixin, ChatUnreadChatCountMixin, View):
+
+    def get_compos(self, raise_404=True):
+        compos_id = int(self.kwargs.get('compos_id', 0))
+        compos = Compos.objects.filter(author=self.request.user, compos_id=compos_id,
+                                       status=OBJECT_STATUS_ACTIVE).first()
+
+        if raise_404 and not compos:
+            raise Http404
+
+        return compos
+
+    def get(self, request, *args, **kwargs):
+        compos = self.get_compos()
+        compos.is_public = False
+        compos.save()
+        return redirect(reverse('workspace-home'))
+
+
 class WorkspaceGuest(LoginRequiredMixin, ChatUnreadChatCountMixin, TemplateView):
     template_name = 'guest.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['literary_composes'] = Compos.objects.filter(author_id=self.kwargs.get('author_id'),
+                                                             is_public=True,
                                                              status=OBJECT_STATUS_ACTIVE).order_by('-id')
         return context
 

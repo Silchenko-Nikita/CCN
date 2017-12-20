@@ -10,9 +10,24 @@
         <div class="column small-12">
           <p><a href="{{ literary_compos.get_absolute_url }}">{{ literary_compos }}</a>
             (Created: {{ literary_compos.created }})
-            <button href="#" data-open="deleteModal-{{ literary_compos.compos_id }}" class="button smtinyall alert float-right">
-              {% trans "Delete" %}
-            </button>
+            <span class="float-right">
+              {% if literary_compos.is_public %}
+                <a href="{% url 'literary-compos-unpublish' literary_compos.compos_id %}">
+                  <button class="button smtinyall">
+                    {% trans "Unpublish" %}
+                  </button>
+                </a>
+              {% else %}
+                <a href="{% url 'literary-compos-publish' literary_compos.compos_id %}">
+                  <button class="button smtinyall">
+                    {% trans "Publish" %}
+                  </button>
+                </a>
+              {% endif %}
+              <button href="#" data-open="deleteModal-{{ literary_compos.compos_id }}" class="button smtinyall alert">
+                {% trans "Delete" %}
+              </button>
+            </span>
           </p>
           <hr>
         </div>

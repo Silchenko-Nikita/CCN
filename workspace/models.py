@@ -23,6 +23,7 @@ class Compos(CreatedUpdatedModel):
     tag = models.CharField(null=True, blank=True, max_length=512)
     compos_id = models.IntegerField(default=0, null=True)  # relates to author
     author = models.ForeignKey(User, related_name='composes')
+    is_public = models.BooleanField(default=False)
 
     def __str__(self):
         return (_('Composition {}') + ' ({})').format(self.compos_id, self.title)
