@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
+from django.urls import reverse
 from django.utils.translation import ugettext as _
 from general.models import CreatedUpdatedModel
 
@@ -16,11 +17,15 @@ class Chat(CreatedUpdatedModel):
         verbose_name = _('Chat')
         verbose_name_plural = _('Chats')
 
+    def get_absolute_url(self):
+        return reverse('chat', kwargs={'pk': self.id})
+
 
 class ChatMessage(CreatedUpdatedModel):
     chat = models.ForeignKey(Chat, related_name='messages')
     author = models.ForeignKey(User, related_name='messages')
     text = models.TextField()
+    is_read = models.BooleanField(default=False)
 
     class Meta:
         db_table = 'chat_message'

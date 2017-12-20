@@ -17,14 +17,21 @@ def chat_connect(message, pk=0):
 
 @channel_session_user
 def chat_message(message, pk=0):
-    ChatMessage.objects.create(
-        chat=Chat.objects.get(pk=pk),
-        text=message.content['text'],
-        author=message.user
-    )
-    serializer = UserSerializer(message.user)
-    sender = serializer.data
-    Group('chat-{}'.format(pk)).send({'text': json.dumps({'message': message.content['text'],
+    data = json.loads(message.content['text'])
+
+    chat = Chat.objects.get(pk=pk)
+
+    if data['type'] == 'got_message':
+        chat.messages.exclude(author=message.user).update(is_read=True)
+    elif data['type'] == 'message':
+        ChatMessage.objects.create(
+            chat=chat,
+            text=data['text'],
+            author=message.user
+        )
+        serializer = UserSerializer(message.user)
+        sender = serializer.data
+        Group('chat-{}'.format(pk)).send({'text': json.dumps({'message': data['text'],
                                             'sender': sender})})
 
 

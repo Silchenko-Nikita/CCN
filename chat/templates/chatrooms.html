@@ -1,0 +1,18 @@
+{% extends "side_nav.html" %}
+
+{% load i18n %}
+
+{% block content_to_right %}
+  <div style="height: 114%; overflow-y: scroll">
+    <br>
+    {% for chat in chat_list %}
+      <div class="row">
+        <div class="column small-12">
+          <p><a href="{{ chat.get_absolute_url }}">{{ chat }}
+            {% if chat in unread_chats %}(unread messages){% endif %}</a></p>
+          <hr>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endblock %}

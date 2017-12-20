@@ -11,15 +11,22 @@
       let webSocket = new WebSocket('wss://' + window.location.host + '/chat/' + {{ chat.id }} + '/');
       webSocket.onmessage = function(message) {
         let data = JSON.parse(message.data);
-        msgArea.append('<div><a href="' + data.sender.profile_view + '">' +
+        msgArea.append('<div style="padding-left: 20px; padding-right: 20px;"><a href="' + data.sender.profile_view + '">' +
           '<strong>'+ data.sender.username + '</strong></a>: <br>' +
           '<div style="word-wrap: break-word; white-space: pre-wrap;">'
           + data.message + '</div></div><hr>');
         msgArea.scrollTop(1000000);
+
+        webSocket.send(JSON.stringify({
+          'type': 'got_message',
+        }));
       };
 
       function webSocketSend() {
-        webSocket.send(elementMessage.val());
+        webSocket.send(JSON.stringify({
+          'type': 'message',
+          'text': elementMessage.val()
+        }));
         elementMessage.val('');
       }
 
@@ -28,8 +35,8 @@
       });
       elementMessage.keydown( function(e) {
         if (!e.shiftKey && e.keyCode == 13){
-          webSocketSend();
           e.preventDefault();
+          webSocketSend();
         }
       });
       msgArea.scrollTop(1000000);
@@ -44,7 +51,7 @@
         <div id="msgArea" style="height: 75%; overflow-y: scroll">
           <br>
           {% for message in messages.all %}
-            <div><a href="{{ message.author.profile.get_absolute_url }}"><strong>{{ message.author }}</strong></a>: <br>
+            <div style="padding-left: 20px; padding-right: 20px;"><a href="{{ message.author.profile.get_absolute_url }}"><strong>{{ message.author }}</strong></a>: <br>
               <div style="word-wrap: break-word; white-space: pre-wrap;">{{ message.text }}</div>
             </div>
             <hr>

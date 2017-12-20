@@ -10,13 +10,14 @@ from django.views.generic import DetailView
 from django.views.generic import TemplateView
 from django.views.generic import UpdateView
 
+from chat.views_mixins import ChatUnreadChatCountMixin
 from general.consts import OBJECT_STATUS_ACTIVE, OBJECT_STATUS_DELETED
 from workspace.forms import LiteraryComposForm, LiteraryComposTitleForm
 from workspace.models import Compos, ComposCommit, ComposBranch
 from workspace.views_mixins import LiteraryComposViewMixin
 
 
-class WorkspaceHome(LoginRequiredMixin, TemplateView):
+class WorkspaceHome(LoginRequiredMixin, ChatUnreadChatCountMixin, TemplateView):
     template_name = 'home.html'
 
     def get_context_data(self, **kwargs):
@@ -26,7 +27,7 @@ class WorkspaceHome(LoginRequiredMixin, TemplateView):
         return context
 
 
-class LiteraryComposTitleUpdateView(LoginRequiredMixin, LiteraryComposViewMixin, UpdateView):
+class LiteraryComposTitleUpdateView(LoginRequiredMixin, ChatUnreadChatCountMixin, LiteraryComposViewMixin, UpdateView):
     model = Compos
     context_object_name = 'compos'
 
@@ -48,7 +49,7 @@ class LiteraryComposTitleUpdateView(LoginRequiredMixin, LiteraryComposViewMixin,
             return redirect(reverse('literary-compos', kwargs={'compos_id': int(self.kwargs.get('compos_id'))}))
 
 
-class LiteraryComposDeleteView(LoginRequiredMixin, LiteraryComposViewMixin, UpdateView):
+class LiteraryComposDeleteView(LoginRequiredMixin, ChatUnreadChatCountMixin, LiteraryComposViewMixin, UpdateView):
     template_name = 'lit_compos/edit.html'
     model = Compos
     context_object_name = 'compos'
@@ -76,7 +77,7 @@ class LiteraryComposDeleteView(LoginRequiredMixin, LiteraryComposViewMixin, Upda
             return redirect(reverse('workspace-home'))
 
 
-class LiteraryComposView(LoginRequiredMixin, LiteraryComposViewMixin, DetailView):
+class LiteraryComposView(LoginRequiredMixin, ChatUnreadChatCountMixin, LiteraryComposViewMixin, DetailView):
     template_name = 'lit_compos/edit.html'
 
     def post(self, request, *args, **kwargs):
@@ -95,7 +96,7 @@ class LiteraryComposView(LoginRequiredMixin, LiteraryComposViewMixin, DetailView
         return context
 
 
-class WorkspaceGuest(LoginRequiredMixin, TemplateView):
+class WorkspaceGuest(LoginRequiredMixin, ChatUnreadChatCountMixin, TemplateView):
     template_name = 'guest.html'
 
     def get_context_data(self, **kwargs):
@@ -105,7 +106,7 @@ class WorkspaceGuest(LoginRequiredMixin, TemplateView):
         return context
 
 
-class LiteraryComposGuestView(LoginRequiredMixin, LiteraryComposViewMixin, DetailView):
+class LiteraryComposGuestView(LoginRequiredMixin, ChatUnreadChatCountMixin, LiteraryComposViewMixin, DetailView):
     template_name = 'lit_compos/preview.html'
 
     def get_context_data(self, **kwargs):

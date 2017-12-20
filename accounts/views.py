@@ -13,9 +13,10 @@ from django.views.generic import UpdateView
 
 from accounts.forms import EmailAuthenticationForm, RegistrationForm, UserProfileInfoForm, AvatarForm
 from accounts.models import UserProfile
+from chat.views_mixins import ChatUnreadChatCountMixin
 
 
-class ProfileView(LoginRequiredMixin, TemplateView):
+class ProfileView(LoginRequiredMixin, ChatUnreadChatCountMixin, TemplateView):
     template_name = 'profile.html'
 
     def get_context_data(self, **kwargs):
@@ -27,7 +28,7 @@ class ProfileView(LoginRequiredMixin, TemplateView):
         return context
 
 
-class GuestProfileView(LoginRequiredMixin, DetailView):
+class GuestProfileView(LoginRequiredMixin, ChatUnreadChatCountMixin, DetailView):
     template_name = 'profile.html'
     model = User
 
@@ -58,7 +59,7 @@ class RegisterFormView(FormView):
         return super(RegisterFormView, self).form_valid(form)
 
 
-class UserProfileInfoView(UpdateView):
+class UserProfileInfoView(LoginRequiredMixin, ChatUnreadChatCountMixin, UpdateView):
     form_class = UserProfileInfoForm
     model = UserProfile
     success_url = reverse_lazy('profile')
@@ -73,19 +74,19 @@ class UserProfileInfoView(UpdateView):
         return super().form_valid(form)
 
 
-class SearchView(ListView):
+class SearchView(LoginRequiredMixin, ChatUnreadChatCountMixin, ListView):
     template_name = 'users/list.html'
     model = User
     queryset = User.objects.none()
 
 
-class FriendsView(ListView):
+class FriendsView(LoginRequiredMixin, ChatUnreadChatCountMixin, ListView):
     template_name = 'users/friends.html'
     model = User
     queryset = User.objects.none()
 
 
-class InviteToFriends(DetailView):
+class InviteToFriends(LoginRequiredMixin, ChatUnreadChatCountMixin, DetailView):
     model = User
 
     def get(self, request, *args, **kwargs):
@@ -94,7 +95,7 @@ class InviteToFriends(DetailView):
         return redirect(reverse_lazy('guest-profile', kwargs=self.kwargs))
 
 
-class ConfirmInvitation(DetailView):
+class ConfirmInvitation(LoginRequiredMixin, ChatUnreadChatCountMixin, DetailView):
     model = User
 
     def get(self, request, *args, **kwargs):
@@ -105,8 +106,6 @@ class ConfirmInvitation(DetailView):
 
 
 class EmailLoginView(LoginView):
-    # extra_context = {"next": reverse_lazy("home")}
-
     form_class = EmailAuthenticationForm
 
 
@@ -115,7 +114,7 @@ def logout(request):
     return redirect(reverse_lazy('index'))
 
 
-class AvatarFormView(LoginRequiredMixin, FormView):
+class AvatarFormView(LoginRequiredMixin, ChatUnreadChatCountMixin, FormView):
     success_url = reverse_lazy('profile')
     template_name = 'profile.html'
     form_class = AvatarForm
